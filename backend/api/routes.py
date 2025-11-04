@@ -1,12 +1,8 @@
-
 # 요청 파라미터 검증, 응답 반환
-import email
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from db.utils import hash_password, verify_password
-from db.crud import student_exists, create_student, get_student_password_and_name, update_student_profile
-# 로그인 시 모든 프로필 정보 반환 (이름, 이메일, 자기소개, 사이트)
-from db.database import get_conn, put_conn
+from db.crud import student_exists, create_student, update_student_profile, login_student
 
 router = APIRouter()
 
@@ -53,23 +49,17 @@ def signup(req: SignupRequest):
 
 @router.post("/login")
 def login(req: LoginRequest):
-    conn = get_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute("SELECT hashed_password, name, email, profile_text, website_link FROM Students WHERE uid=%s", (req.uid,))
-            row = cur.fetchone()
-            if not row or not verify_password(req.password, row[0]):
-                raise HTTPException(status_code=401, detail="아이디 또는 비밀번호가 올바르지 않습니다.")
-            # row: (hashed_password, name, uid, profile_text, website_link)
-            return {
-                "msg": f"{row[1]} 님 환영합니다",
-                "name": row[1],
-                "email": row[2],
-                "profile_text": row[3] or "",
-                "website_link": row[4] or ""
-            }
-    finally:
-        put_conn(conn)
+    result = login_student(req.uid, req.password, verify_password)
+    if not result:
+        raise HTTPException(status_code=401, detail="아이디 또는 비밀번호가 올바르지 않습니다.")
+    name, email, profile_text, website_link = result
+    return {
+        "msg": f"{name} 님 환영합니다",
+        "name": name,
+        "email": email,
+        "profile_text": profile_text,
+        "website_link": website_link
+    }
 
 @router.get("/health")
 def health_check():
