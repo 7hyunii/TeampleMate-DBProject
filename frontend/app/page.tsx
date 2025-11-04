@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Header } from '../components/Header';
+import { Navigation } from '../components/Navigation';
 import { ProjectList } from '../components/ProjectList';
 import { ProjectDetail } from '../components/ProjectDetail';
 import { CreateProject } from '../components/CreateProject';
@@ -10,6 +10,7 @@ import { ProfileManagement } from '../components/ProfileManagement';
 import { MyApplications } from '../components/MyApplications';
 import { MyProjects } from '../components/MyProjects';
 import { PeerReview } from '../components/PeerReview';
+import { Footer } from '../components/Footer';
 
 type View = 
   | 'projects' 
@@ -69,7 +70,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
-      <Header 
+      <Navigation
         currentView={currentView} 
         onViewChange={handleViewChange}
         currentUser={currentUserName}
@@ -128,6 +129,7 @@ export default function Home() {
           />
         )}
       </main>
+      <Footer />
     </div>
   );
 }

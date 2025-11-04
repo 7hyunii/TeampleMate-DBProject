@@ -3,13 +3,13 @@
 import { Search, Plus, User, Home, FileText, Star } from 'lucide-react';
 import { Button } from './ui/button';
 
-interface HeaderProps {
+interface NavigationProps {
   currentView: string;
   onViewChange: (view: string) => void;
   currentUser: string;
 }
 
-export function Header({ currentView, onViewChange, currentUser }: HeaderProps) {
+export function Navigation({ currentView, onViewChange, currentUser }: NavigationProps) {
   return (
     <header className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4">
