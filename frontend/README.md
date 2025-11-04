@@ -10,9 +10,8 @@ frontend/
 │   ├── layout.tsx
 │   └── page.tsx
 ├── components/           # 재사용 가능한 컴포넌트
-│   ├── Header.tsx
-│   ├── ProjectList.tsx
-│   ├── ProjectDetail.tsx
+│   ├── Navigation.tsx
+│   ├── Footer.tsx
 │   ├── ...
 │   ├── figma/            # 피그마 관련 컴포넌트
 │   │   └── ImageWithFallback.tsx
