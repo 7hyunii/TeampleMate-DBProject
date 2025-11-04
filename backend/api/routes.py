@@ -4,7 +4,7 @@ import email
 from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel
 from db.utils import hash_password, verify_password
-from db.crud import student_exists, create_student, get_student_password_and_name
+from db.crud import student_exists, create_student, get_student_password_and_name, update_student_profile
 # 로그인 시 모든 프로필 정보 반환 (이름, 이메일, 자기소개, 사이트)
 from db.database import get_conn, put_conn
 
@@ -81,20 +81,8 @@ def health_check():
 
 @router.patch("/profile/update")
 def update_profile(req: ProfileUpdateRequest):
-    conn = get_conn()
     try:
-        with conn.cursor() as cur:
-            cur.execute(
-                """
-                UPDATE Students
-                SET name=%s, email=%s, profile_text=%s, website_link=%s
-                WHERE uid=%s
-                """,
-                (req.name, req.email, req.profile_text, req.website_link, req.uid)
-            )
-            if cur.rowcount == 0:
-                raise HTTPException(status_code=404, detail="해당 학생을 찾을 수 없습니다.")
-            conn.commit()
-            return {"msg": "프로필이 성공적으로 수정되었습니다."}
-    finally:
-        put_conn(conn)
+        update_student_profile(req.uid, req.name, req.email, req.profile_text, req.website_link)
+        return {"msg": "프로필이 성공적으로 수정되었습니다."}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail=str(e))

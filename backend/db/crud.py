@@ -41,3 +41,22 @@ def get_student_password_and_name(uid: str):
             return cur.fetchone()  # (hashed_password, name) 튜플 반환
     finally:
         put_conn(conn)  # 커넥션 반환
+
+# 프로필 정보 수정 함수
+def update_student_profile(uid: str, name: str, email: str, profile_text: str, website_link: str):
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                UPDATE Students
+                SET name=%s, email=%s, profile_text=%s, website_link=%s
+                WHERE uid=%s
+                """,
+                (name, email, profile_text, website_link, uid)
+            )
+            if cur.rowcount == 0:
+                raise Exception("해당 학생을 찾을 수 없습니다.")
+            conn.commit()
+    finally:
+        put_conn(conn)

@@ -8,6 +8,7 @@ backend/
 ├── api/
 │   └── routes.py           # FastAPI 라우터(엔드포인트) 코드
 ├── db/
+│   ├── crud.py             # DB Query 처리
 │   ├── SQL_Check.sql       # DB check
 │   ├── ...
 ├── main.py                 # FastAPI 앱 진입점
@@ -21,6 +22,8 @@ backend/
 - `main.py` : FastAPI 앱 실행 및 라우터 등록
 - `create_tables.sql` : PostgreSQL 테이블 생성 SQL
 - `venv/` : 프로젝트별 가상환경(공유/커밋 X)
+- `routes.py` : API 요청/응답 처리, 파라미터 검증, DB 작업은 crud.py 함수 호출
+- `crud.py` : DB 쿼리만 담당
 
 ## 실행 예시
 1. 가상환경 활성화
