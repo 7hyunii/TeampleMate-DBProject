@@ -17,7 +17,7 @@ interface ProfileManagementProps {
 }
 export function ProfileManagement({ currentUser, onLogout }: ProfileManagementProps) {
   // 글로벌 상태에서 사용자 정보 가져오기
-  const { userId, userName, userEmail, profileText: globalProfileText, website: globalWebsite, setProfileText: setGlobalProfileText, setWebsite: setGlobalWebsite, setLoggedIn } = useAuth();
+  const { userId, userName, userEmail, profileText: globalProfileText, website: globalWebsite, setProfileText: setGlobalProfileText, setWebsite: setGlobalWebsite, setLoggedIn, setUserEmail } = useAuth();
   const [name, setName] = useState(userName || "");
   const [email, setEmail] = useState(userEmail || "");
   const [profileText, setProfileText] = useState(globalProfileText || "");
@@ -86,6 +86,7 @@ export function ProfileManagement({ currentUser, onLogout }: ProfileManagementPr
       if (res.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
+        setUserEmail(email); // 이메일도 글로벌 상태에 반영
         setGlobalProfileText(profileText);
         setGlobalWebsite(website);
       } else {
