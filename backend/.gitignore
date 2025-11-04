@@ -20,4 +20,5 @@ venv/
 # 기타
 .DS_Store
 /db/SQL_Check.sql
+/db/CreateTable.sql
 DB_Report.md

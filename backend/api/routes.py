@@ -2,7 +2,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from db.utils import hash_password, verify_password
-from db.crud import student_exists, create_student, update_student_profile, login_student
+from db.crud import student_exists, create_student, update_student_profile, login_student, get_student_profile_with_skills
 
 router = APIRouter()
 
@@ -22,6 +22,7 @@ class ProfileUpdateRequest(BaseModel):
     email: str = ""
     profile_text: str = ""
     website_link: str = ""
+    skills: list[str] = []
 
 
 @router.get("/")
@@ -35,6 +36,7 @@ def root():
             {"path": "/signup", "method": "POST", "desc": "회원가입"},
             {"path": "/login", "method": "POST", "desc": "로그인"},
             {"path": "/health", "method": "GET", "desc": "서버 헬스체크"},
+            {"path": "/profile", "method": "GET", "desc": "프로필 조회 (쿼리 파라미터: uid, 예시: /profile?uid=your_id)"},
             {"path": "/profile/update", "method": "PATCH", "desc": "프로필 수정"}
         ]
     }
@@ -69,10 +71,19 @@ def health_check():
     return {"status": "ok"}
 
 
+# 프로필 정보 조회
+@router.get("/profile")
+def get_profile(uid: str):
+    result = get_student_profile_with_skills(uid)
+    if not result:
+        raise HTTPException(status_code=404, detail="해당 학생을 찾을 수 없습니다.")
+    return result
+
+# 프로필 정보 수정
 @router.patch("/profile/update")
 def update_profile(req: ProfileUpdateRequest):
     try:
-        update_student_profile(req.uid, req.name, req.email, req.profile_text, req.website_link)
+        update_student_profile(req.uid, req.name, req.email, req.profile_text, req.website_link, req.skills)
         return {"msg": "프로필이 성공적으로 수정되었습니다."}
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))

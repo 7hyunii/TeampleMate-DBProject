@@ -22,32 +22,23 @@ export function ProfileManagement({ currentUser, onLogout }: ProfileManagementPr
   const [email, setEmail] = useState(userEmail || "");
   const [profileText, setProfileText] = useState(globalProfileText || "");
   const [website, setWebsite] = useState(globalWebsite || "");
-  const [skills, setSkills] = useState([
-    "React",
-    "TypeScript",
-    "Node.js",
-    "Python",
-  ]);
+  const [skills, setSkills] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState("");
   const [saved, setSaved] = useState(false);
 
   const availableSkills = [
-    "JavaScript",
-    "Java",
-    "C++",
-    "Spring Boot",
-    "Django",
-    "Flask",
-    "MySQL",
-    "MongoDB",
-    "PostgreSQL",
-    "Docker",
-    "Kubernetes",
-    "AWS",
-    "Firebase",
-    "Git",
-    "Figma",
-    "UI/UX",
+    // 언어
+    "JavaScript", "TypeScript", "Java", "Kotlin", "C", "C++", "C#", "Python", "Go", "Rust", "Swift", "PHP", "Ruby",
+    // 프론트엔드
+    "React", "Next.js", "Vue.js", "Nuxt.js", "Angular", "Svelte", "HTML", "CSS", "SCSS", "Tailwind CSS", "Styled Components",
+    // 백엔드/프레임워크
+    "Spring Boot", "Spring", "Django", "Flask", "Express.js", "FastAPI", "Node.js", "NestJS", "ASP.NET Core", "Laravel",
+    // 데이터베이스
+    "MySQL", "PostgreSQL", "MongoDB", "SQLite", "Oracle", "MariaDB",
+    // DevOps/클라우드
+    "Docker", "Kubernetes", "AWS", "GCP", "Azure", "Firebase", "Vercel", "Netlify", "Heroku", "Jenkins", "GitHub Actions",
+    // 협업/디자인
+    "Git", "GitHub", "GitLab", "Figma", "Zeplin", "Jira", "Notion", "Slack", "UI/UX",
   ];
 
   // 로그인 후 글로벌 상태가 바뀌면 동기화
@@ -56,11 +47,19 @@ export function ProfileManagement({ currentUser, onLogout }: ProfileManagementPr
     setEmail(userEmail || "");
     setProfileText(globalProfileText || "");
     setWebsite(globalWebsite || "");
-  }, [userName, userEmail, globalProfileText, globalWebsite]);
+    fetch(`http://localhost:8000/profile?uid=${userId}`)
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data && Array.isArray(data.skills)) {
+          setSkills(data.skills);
+        }
+      });
+  }, [userName, userEmail, globalProfileText, globalWebsite, userId]);
 
   const addSkill = (skill: string) => {
-    if (skill && !skills.includes(skill)) {
-      setSkills([...skills, skill]);
+    const normalized = skill.trim().toLowerCase();
+    if (normalized && !skills.includes(normalized)) {
+      setSkills([...skills, normalized]);
       setNewSkill("");
     }
   };
@@ -80,13 +79,14 @@ export function ProfileManagement({ currentUser, onLogout }: ProfileManagementPr
           name,
           email,
           profile_text: profileText,
-          website_link: website
+          website_link: website,
+          skills,
         })
       });
       if (res.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
-        setUserEmail(email); // 이메일도 글로벌 상태에 반영
+        setUserEmail(email);
         setGlobalProfileText(profileText);
         setGlobalWebsite(website);
       } else {
