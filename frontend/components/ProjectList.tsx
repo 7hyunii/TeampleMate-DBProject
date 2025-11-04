@@ -14,67 +14,11 @@ interface ProjectListProps {
   onCreateProject: () => void;
 }
 
-// === 모킹 데이터 시작 ===
-const mockProjects = [
-  {
-    id: '1',
-    title: 'AI 기반 학습 도우미 앱 개발',
-    description: 'ChatGPT API를 활용한 학생들을 위한 학습 도우미 애플리케이션을 개발합니다. React Native로 크로스 플랫폼 앱을 만들 예정입니다.',
-    leader: '김민수',
-    skills: ['React Native', 'TypeScript', 'Node.js', 'AI/ML'],
-    capacity: 5,
-    currentMembers: 2,
-    deadline: '2025-11-15',
-    status: 'Recruiting' as const
-  },
-  {
-    id: '2',
-    title: '부산 대학가 맛집 추천 플랫폼',
-    description: '부산대 주변 맛집 정보를 공유하고 추천할 수 있는 웹 플랫폼입니다. 위치 기반 서비스와 리뷰 시스템을 구현합니다.',
-    leader: '박지영',
-    skills: ['React', 'Spring Boot', 'MySQL', 'Kakao Maps API'],
-    capacity: 4,
-    currentMembers: 3,
-    deadline: '2025-11-10',
-    status: 'Recruiting' as const
-  },
-  {
-    id: '3',
-    title: '블록체인 기반 중고거래 시스템',
-    description: '블록체인 기술을 활용하여 신뢰할 수 있는 중고거래 플랫폼을 구축합니다. 스마트 컨트랙트로 거래 보안을 강화합니다.',
-    leader: '이준호',
-    skills: ['Solidity', 'Web3.js', 'React', 'Ethereum'],
-    capacity: 6,
-    currentMembers: 4,
-    deadline: '2025-11-20',
-    status: 'Recruiting' as const
-  },
-  {
-    id: '4',
-    title: 'IoT 스마트 캠퍼스 프로젝트',
-    description: '아두이노와 라즈베리파이를 활용한 스마트 캠퍼스 솔루션을 개발합니다.',
-    leader: '최서연',
-    skills: ['Arduino', 'Raspberry Pi', 'Python', 'MQTT'],
-    capacity: 4,
-    currentMembers: 4,
-    deadline: '2025-11-08',
-    status: 'In Progress' as const
-  },
-  {
-    id: '5',
-    title: '데이터 시각화 대시보드',
-    description: '공공 데이터를 활용한 인터랙티브 데이터 시각화 대시보드를 제작합니다.',
-    leader: '정현우',
-    skills: ['D3.js', 'React', 'Python', 'FastAPI'],
-    capacity: 3,
-    currentMembers: 3,
-    deadline: '2025-10-30',
-    status: 'Completed' as const
-  }
-];
+
+import { useEffect } from 'react';
 
 const allSkills = ['React', 'TypeScript', 'Node.js', 'Python', 'Spring Boot', 'MySQL', 'AI/ML', 'React Native', 'Solidity', 'Web3.js'];
-// === 모킹 데이터 끝 ===
+
 
 
 export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps) {
@@ -83,29 +27,48 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('deadline');
   const { isLoggedIn, openAuthModal } = useAuth();
+  const [projects, setProjects] = useState<any[]>([]);
+
+  useEffect(() => {
+    fetch(`http://localhost:8000/projects?orderBy=${sortBy}`)
+      .then(res => res.ok ? res.json() : Promise.reject(res))
+      .then(data => {
+        setProjects(data.projects.map((p: any) => ({
+          id: p.project_id,
+          title: p.topic,
+          description: p.description1,
+          fullDescription: p.description2,
+          leader: p.leader_name,
+          skills: p.skills,
+          capacity: p.capacity,
+          // currentMembers: 0, // TODO: 실제 인원 구현 시 수정
+          deadline: p.deadline,
+          status: p.status,
+        })));
+      })
+      .catch(() => setProjects([]));
+  }, [sortBy]);
 
   const toggleSkill = (skill: string) => {
-    setSelectedSkills(prev => 
-      prev.includes(skill) 
+    setSelectedSkills(prev =>
+      prev.includes(skill)
         ? prev.filter(s => s !== skill)
         : [...prev, skill]
     );
   };
 
-  const filteredProjects = mockProjects
+  const filteredProjects = projects
     .filter(project => {
       const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          project.description.toLowerCase().includes(searchTerm.toLowerCase());
+        (project.description?.toLowerCase().includes(searchTerm.toLowerCase()));
       const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
-      const matchesSkills = selectedSkills.length === 0 || 
-                          selectedSkills.some(skill => project.skills.includes(skill));
+      const matchesSkills = selectedSkills.length === 0 ||
+        selectedSkills.some(skill => project.skills.includes(skill));
       return matchesSearch && matchesStatus && matchesSkills;
     })
     .sort((a, b) => {
       if (sortBy === 'deadline') {
         return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-      } else if (sortBy === 'members') {
-        return (b.capacity - b.currentMembers) - (a.capacity - a.currentMembers);
       }
       return 0;
     });
@@ -169,7 +132,7 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="deadline">마감일순</SelectItem>
-                  <SelectItem value="members">모집인원순</SelectItem>
+                  <SelectItem value="capacity">모집인원순</SelectItem>
                 </SelectContent>
               </Select>
             </div>

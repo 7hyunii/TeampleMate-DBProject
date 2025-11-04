@@ -31,6 +31,10 @@ export function CreateProject({ onBack, onSubmit }: CreateProjectProps) {
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [customSkill, setCustomSkill] = useState('');
 
+
+  // AuthProvider에서 userId 가져오기 (-> leader_id)
+  const { userId } = require("./AuthProvider").useAuth();
+
   const toggleSkill = (skill: string) => {
     setSelectedSkills(prev =>
       prev.includes(skill)
@@ -50,17 +54,30 @@ export function CreateProject({ onBack, onSubmit }: CreateProjectProps) {
     setSelectedSkills(prev => prev.filter(s => s !== skill));
   };
 
-  const handleSubmit = () => {
-    // 실제로는 데이터 저장
-    console.log({
-      title,
-      description,
-      fullDescription,
-      capacity: parseInt(capacity),
-      deadline,
-      skills: selectedSkills
-    });
-    onSubmit();
+  const handleSubmit = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/project", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          leader_id: userId,
+          topic: title,
+          description1: description,
+          description2: fullDescription,
+          capacity: parseInt(capacity),
+          deadline,
+          skills: selectedSkills,
+        }),
+      });
+      if (res.ok) {
+        onSubmit();
+      } else {
+        const data = await res.json();
+        alert(data.detail || "프로젝트 생성 실패");
+      }
+    } catch (e) {
+      alert("서버 오류로 프로젝트 생성에 실패했습니다.");
+    }
   };
 
   const isValid = title && description && fullDescription && capacity && deadline && selectedSkills.length > 0;

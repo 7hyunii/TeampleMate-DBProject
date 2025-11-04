@@ -102,3 +102,83 @@ def update_student_profile(uid: str, name: str, email: str, profile_text: str, w
     finally:
         put_conn(conn)
 
+
+# 프로젝트 생성
+def create_project_with_skills(leader_id, topic, description1, description2, capacity, deadline, skills):
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            # 프로젝트 정보 INSERT (생성된 project_id 반환)
+            cur.execute(
+                """
+                INSERT INTO Projects (leader_id, topic, description1, description2, capacity, deadline)
+                VALUES (%s, %s, %s, %s, %s, %s)
+                RETURNING project_id
+                """,
+                (leader_id, topic, description1, description2, capacity, deadline)
+            )
+            project_id = cur.fetchone()[0]  # 생성된 프로젝트 ID 
+            # 스킬 등록, 프로젝트-스킬 매핑
+            for skill in skills:
+                # Skills 테이블에 없으면 추가
+                cur.execute(
+                    "INSERT INTO Skills (skill_name) VALUES (%s) ON CONFLICT (skill_name) DO NOTHING",
+                    (skill.lower(),)
+                )
+                # Project_Required_Skills에 (project_id, skill_id) 매핑
+                cur.execute(
+                    "INSERT INTO Project_Required_Skills (project_id, skill_id) SELECT %s, skill_id FROM Skills WHERE skill_name=%s",
+                    (project_id, skill.lower())
+                )
+            conn.commit()
+    finally:
+        put_conn(conn)
+
+
+# 전체 프로젝트 목록 조회
+def get_all_projects(order_by: str = "deadline"):
+    conn = get_conn()
+    try:
+        with conn.cursor() as cur:
+            # 정렬 기준 동적으로 처리
+            if order_by == "capacity":
+                order_sql = "ORDER BY p.capacity DESC, p.deadline ASC"
+            else:
+                order_sql = "ORDER BY p.deadline ASC"
+            query = f"""
+                SELECT p.project_id, p.leader_id, p.topic, p.description1, p.capacity, p.deadline, p.status, s.name as leader_name
+                FROM Projects p
+                JOIN Students s ON p.leader_id = s.uid
+                WHERE NOT (p.status = 'Recruiting' AND p.deadline < CURRENT_DATE)
+                {order_sql}
+            """
+            cur.execute(query)
+            projects = []
+            for row in cur.fetchall():
+                project = {
+                    "project_id": row[0],
+                    "leader_id": row[1],
+                    "topic": row[2],
+                    "description1": row[3],
+                    "capacity": row[4],
+                    "deadline": row[5],
+                    "status": row[6],
+                    "leader_name": row[7]
+                }
+
+                # 프로젝트별 요구 스킬 목록 조회
+                cur2 = conn.cursor()
+                cur2.execute(
+                    """
+                    SELECT s.skill_name FROM Skills s
+                    JOIN Project_Required_Skills prs ON s.skill_id = prs.skill_id
+                    WHERE prs.project_id = %s
+                    """, (row[0],)
+                )
+                project["skills"] = [r[0] for r in cur2.fetchall()]
+                cur2.close()
+                projects.append(project)
+            return projects
+    finally:
+        put_conn(conn)
+

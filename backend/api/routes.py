@@ -1,9 +1,10 @@
 # 요청 파라미터 검증, 응답 반환
+from tkinter.tix import STATUS
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from db.utils import hash_password, verify_password
 from db.crud import student_exists, create_student, update_student_profile, login_student, get_student_profile_with_skills
-
+from db.crud import create_project_with_skills, get_all_projects
 router = APIRouter()
 
 class SignupRequest(BaseModel):
@@ -15,7 +16,7 @@ class LoginRequest(BaseModel):
     uid: str
     password: str
 
-# 프로필 수정 요청 모델 및 엔드포인트
+# 프로필 수정 요청 모델
 class ProfileUpdateRequest(BaseModel):
     uid: str
     name: str
@@ -23,6 +24,16 @@ class ProfileUpdateRequest(BaseModel):
     profile_text: str = ""
     website_link: str = ""
     skills: list[str] = []
+
+# 프로젝트 생성 요청 모델
+class ProjectCreateRequest(BaseModel):
+    leader_id: str
+    topic: str
+    description1: str
+    description2: str
+    capacity: int
+    deadline: str
+    skills: list[str]
 
 
 @router.get("/")
@@ -36,8 +47,28 @@ def root():
             {"path": "/signup", "method": "POST", "desc": "회원가입"},
             {"path": "/login", "method": "POST", "desc": "로그인"},
             {"path": "/health", "method": "GET", "desc": "서버 헬스체크"},
-            {"path": "/profile", "method": "GET", "desc": "프로필 조회 (쿼리 파라미터: uid, 예시: /profile?uid=your_id)"},
-            {"path": "/profile/update", "method": "PATCH", "desc": "프로필 수정"}
+            {
+                "path": "/profile",
+                "method": "GET",
+                "desc": "프로필 조회",
+                "params": {
+                    "uid": "학생 고유 아이디 (string, 필수)"
+                },
+                "example": "/profile?uid=your_id",
+                "response": "{ uid, name, email, profile_text, website_link, skills: [...] }"
+            },
+            {"path": "/profile/update", "method": "PATCH", "desc": "프로필 수정"},
+            {"path": "/project", "method": "POST", "desc": "프로젝트 생성"},
+            {
+                "path": "/projects",
+                "method": "GET",
+                "desc": "프로젝트 탐색 화면",
+                "params": {
+                    "orderBy": "정렬 기준 (string, default: deadline, values: deadline, capacity)"
+                },
+                "example": "/projects?orderBy=capacity",
+                "response": "{ projects: [...] }"
+            }
         ]
     }
 
@@ -87,3 +118,26 @@ def update_profile(req: ProfileUpdateRequest):
         return {"msg": "프로필이 성공적으로 수정되었습니다."}
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
+
+
+# 프로젝트 생성
+@router.post("/project")
+def create_project(req: ProjectCreateRequest):
+    try:
+        create_project_with_skills(
+            req.leader_id, req.topic, req.description1, req.description2, req.capacity, req.deadline, req.skills
+        )
+        return {"msg": "프로젝트가 성공적으로 생성되었습니다."}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+# 프로젝트 탐색 화면
+@router.get("/projects")
+def get_projects(orderBy: str = "deadline"):
+    # default : deadline 기준 정렬
+    try:
+        projects = get_all_projects(order_by=orderBy)
+        return {"projects": projects}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
