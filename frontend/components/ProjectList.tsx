@@ -5,6 +5,7 @@ import { Search, Filter, Plus } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { ProjectCard } from './ProjectCard';
+import { useAuth } from './AuthProvider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Badge } from './ui/badge';
 
@@ -75,11 +76,13 @@ const mockProjects = [
 const allSkills = ['React', 'TypeScript', 'Node.js', 'Python', 'Spring Boot', 'MySQL', 'AI/ML', 'React Native', 'Solidity', 'Web3.js'];
 // === 모킹 데이터 끝 ===
 
+
 export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('deadline');
+  const { isLoggedIn, openAuthModal } = useAuth();
 
   const toggleSkill = (skill: string) => {
     setSelectedSkills(prev => 
@@ -107,6 +110,14 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
       return 0;
     });
 
+  const handleCreateProject = () => {
+    if (!isLoggedIn) {
+      openAuthModal();
+      return;
+    }
+    onCreateProject();
+  };
+
   return (
     <div className="space-y-6 md:space-y-8">
       {/* Header Section */}
@@ -115,7 +126,7 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
           <h2>프로젝트 탐색</h2>
           <p className="text-gray-600">함께할 팀 프로젝트를 찾아보세요</p>
         </div>
-        <Button onClick={onCreateProject} className="gap-2 shadow-lg hover:shadow-xl transition-all bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 w-full sm:w-auto">
+  <Button onClick={handleCreateProject} className="gap-2 shadow-lg hover:shadow-xl transition-all bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 w-full sm:w-auto">
           <Plus className="h-4 w-4" />
           프로젝트 생성
         </Button>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '../components/AuthProvider';
 import { Navigation } from '../components/Navigation';
 import { ProjectList } from '../components/ProjectList';
 import { ProjectDetail } from '../components/ProjectDetail';
@@ -25,8 +26,7 @@ type View =
 export default function Home() {
   const [currentView, setCurrentView] = useState<View>('projects');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const currentUser = 'user2';
-  const currentUserName = '김민수';
+  const { userName } = useAuth();
 
   const handleViewDetail = (projectId: string) => {
     setSelectedProjectId(projectId);
@@ -71,9 +71,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
       <Navigation
-        currentView={currentView} 
+        currentView={currentView}
         onViewChange={handleViewChange}
-        currentUser={currentUserName}
       />
       
       <main className="container mx-auto px-4 py-4 md:py-8 pb-24 md:pb-8">
@@ -88,7 +87,7 @@ export default function Home() {
           <ProjectDetail
             projectId={selectedProjectId}
             onBack={handleBack}
-            currentUserId={currentUser}
+            currentUserId={userName}
           />
         )}
         
@@ -107,7 +106,10 @@ export default function Home() {
         )}
         
         {currentView === 'profile' && (
-          <ProfileManagement currentUser={currentUserName} />
+          <ProfileManagement 
+            currentUser={userName}
+            onLogout={() => setCurrentView('projects')}
+          />
         )}
         
         {currentView === 'applications' && (

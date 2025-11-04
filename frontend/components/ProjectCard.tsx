@@ -1,9 +1,11 @@
 'use client';
 
 import { Calendar, Users, Clock } from "lucide-react";
+
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
+import { useAuth } from "./AuthProvider";
 
 interface ProjectCardProps {
   project: {
@@ -24,6 +26,7 @@ export function ProjectCard({
   project,
   onViewDetail,
 }: ProjectCardProps) {
+  const { isLoggedIn, openAuthModal } = useAuth();
   const statusColors = {
     Recruiting:
       "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -38,10 +41,18 @@ export function ProjectCard({
       (1000 * 60 * 60 * 24),
   );
 
+  const handleClick = () => {
+    if (!isLoggedIn) {
+      openAuthModal();
+      return;
+    }
+    onViewDetail(project.id);
+  };
+
   return (
     <Card
       className="p-4 md:p-6 hover:shadow-2xl hover:border-indigo-300 transition-all duration-300 cursor-pointer group relative overflow-hidden bg-gradient-to-br from-white to-slate-50/50"
-      onClick={() => onViewDetail(project.id)}
+      onClick={handleClick}
     >
       {/* Decorative gradient accent */}
       <div className="absolute top-0 right-0 w-24 md:w-32 h-24 md:h-32 bg-gradient-to-br from-indigo-100/40 to-purple-100/40 rounded-full blur-3xl -z-0 group-hover:scale-150 transition-transform duration-500" />

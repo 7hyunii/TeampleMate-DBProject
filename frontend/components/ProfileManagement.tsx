@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useAuth } from "./AuthProvider";
 import { Plus, X, Save, ExternalLink } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -12,20 +13,15 @@ import { Avatar, AvatarFallback } from "./ui/avatar";
 
 interface ProfileManagementProps {
   currentUser: string;
+  onLogout?: () => void;
 }
-
-export function ProfileManagement({
-  currentUser,
-}: ProfileManagementProps) {
-  // === 모킹 데이터 시작 ===
-  const [name, setName] = useState("김민수");
-  const [email, setEmail] = useState("minsu.kim@pusan.ac.kr");
-  const [profileText, setProfileText] = useState(
-    "컴퓨터공학과 3학년 학생입니다. 웹 개발과 AI에 관심이 많으며, 다양한 프로젝트 경험을 통해 실력을 키우고 있습니다.",
-  );
-  const [website, setWebsite] = useState(
-    "https://github.com/minsukim",
-  );
+export function ProfileManagement({ currentUser, onLogout }: ProfileManagementProps) {
+  // 글로벌 상태에서 사용자 정보 가져오기
+  const { userId, userName, userEmail, profileText: globalProfileText, website: globalWebsite, setProfileText: setGlobalProfileText, setWebsite: setGlobalWebsite, setLoggedIn } = useAuth();
+  const [name, setName] = useState(userName || "");
+  const [email, setEmail] = useState(userEmail || "");
+  const [profileText, setProfileText] = useState(globalProfileText || "");
+  const [website, setWebsite] = useState(globalWebsite || "");
   const [skills, setSkills] = useState([
     "React",
     "TypeScript",
@@ -53,7 +49,14 @@ export function ProfileManagement({
     "Figma",
     "UI/UX",
   ];
-  // === 모킹 데이터 끝 ===
+
+  // 로그인 후 글로벌 상태가 바뀌면 동기화
+  useEffect(() => {
+    setName(userName || "");
+    setEmail(userEmail || "");
+    setProfileText(globalProfileText || "");
+    setWebsite(globalWebsite || "");
+  }, [userName, userEmail, globalProfileText, globalWebsite]);
 
   const addSkill = (skill: string) => {
     if (skill && !skills.includes(skill)) {
@@ -66,10 +69,39 @@ export function ProfileManagement({
     setSkills(skills.filter((s) => s !== skill));
   };
 
-  const handleSave = () => {
-    // 실제로는 데이터 저장
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+  const handleSave = async () => {
+    // DB에 저장: PATCH /profile/update
+    try {
+      const res = await fetch("http://localhost:8000/profile/update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          uid: userId, 
+          name,
+          email,
+          profile_text: profileText,
+          website_link: website
+        })
+      });
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+        setGlobalProfileText(profileText);
+        setGlobalWebsite(website);
+      } else {
+        const data = await res.json();
+        alert(data.detail || "저장 실패");
+      }
+    } catch (e) {
+      alert("서버 오류로 저장에 실패했습니다.");
+    }
+  };
+
+  const handleLogout = () => {
+    setLoggedIn(false);
+    if (onLogout) {
+      onLogout();
+    }
   };
 
   return (
@@ -90,15 +122,20 @@ export function ProfileManagement({
           </Avatar>
           <div className="flex-1">
             <h3 className="mb-2 text-slate-900">{name}</h3>
-            <p className="text-sm text-slate-600 mb-1">
-              {email}
-            </p>
+            <p className="text-sm text-slate-600 mb-1">{email}</p>
             <div className="inline-flex items-center gap-2 mt-2 px-3 py-1.5 bg-indigo-50 rounded-lg">
               <span className="text-xs font-medium text-indigo-700">
-                학생 ID: {currentUser}
+                내 ID: {userId}
               </span>
             </div>
           </div>
+          <Button 
+            variant="outline" 
+            onClick={handleLogout}
+            className="border-red-200 text-red-600 hover:text-red-600 hover:bg-red-50 hover:border-red-300"
+          >
+            로그아웃
+          </Button>
         </div>
 
         <div className="space-y-6">
@@ -146,7 +183,7 @@ export function ProfileManagement({
                 <Input
                   id="website"
                   type="url"
-                  placeholder="https://github.com/username"
+                  placeholder="Ex) https://github.com/username"
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
                   className="pl-10"

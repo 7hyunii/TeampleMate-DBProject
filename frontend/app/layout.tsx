@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
+
 import '../styles/globals.css';
+import { AuthProvider } from '../components/AuthProvider';
 
 export const metadata: Metadata = {
   title: 'Teample Mate',
@@ -13,7 +15,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </body>
     </html>
   );
 }
