@@ -8,7 +8,7 @@ backend/
 ├── api/
 │   └── routes.py           # FastAPI 라우터(엔드포인트) 코드
 ├── db/
-│   ├── create_tables.sql   # DB 테이블 생성 SQL
+│   ├── SQL_Check.sql       # DB check
 │   ├── ...
 ├── main.py                 # FastAPI 앱 진입점
 ├── venv/                   # Python 가상환경 폴더
