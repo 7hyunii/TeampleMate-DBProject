@@ -8,19 +8,18 @@ import { Textarea } from './ui/textarea';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Label } from './ui/label';
+import { availableSkills, SKILL_DISPLAY_MAP } from "../constants/skills";
 
 interface CreateProjectProps {
   onBack: () => void;
   onSubmit: () => void;
 }
 
-// === 모킹 데이터 시작 ===
-const availableSkills = [
-  'React', 'TypeScript', 'Node.js', 'Python', 'Java', 'Spring Boot',
-  'MySQL', 'MongoDB', 'AI/ML', 'React Native', 'Vue.js', 'Angular',
-  'Docker', 'Kubernetes', 'AWS', 'Firebase', 'GraphQL', 'Redis'
-];
-// === 모킹 데이터 끝 ===
+
+function displaySkill(skill: string): string {
+  const key = skill.trim().toLowerCase();
+  return SKILL_DISPLAY_MAP[key] || skill.charAt(0).toUpperCase() + skill.slice(1);
+}
 
 export function CreateProject({ onBack, onSubmit }: CreateProjectProps) {
   const [title, setTitle] = useState('');
@@ -171,7 +170,7 @@ export function CreateProject({ onBack, onSubmit }: CreateProjectProps) {
                     key={skill}
                     className="bg-primary text-primary-foreground gap-1 pr-1"
                   >
-                    {skill}
+                    {displaySkill(skill)}
                     <button
                       onClick={() => removeSkill(skill)}
                       className="ml-1 hover:bg-primary-foreground/20 rounded-full p-0.5"

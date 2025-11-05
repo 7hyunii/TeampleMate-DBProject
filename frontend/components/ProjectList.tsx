@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Filter, Plus } from 'lucide-react';
 import { Input } from './ui/input';
 import { Button } from './ui/button';
@@ -14,8 +14,6 @@ interface ProjectListProps {
   onCreateProject: () => void;
 }
 
-
-import { useEffect } from 'react';
 
 const allSkills = ['React', 'TypeScript', 'Node.js', 'Python', 'Spring Boot', 'MySQL', 'AI/ML', 'React Native', 'Solidity', 'Web3.js'];
 

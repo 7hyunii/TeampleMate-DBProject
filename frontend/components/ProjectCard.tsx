@@ -6,6 +6,7 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { useAuth } from "./AuthProvider";
+import { SKILL_DISPLAY_MAP } from "../constants/skills";
 
 interface ProjectCardProps {
   project: {
@@ -20,6 +21,11 @@ interface ProjectCardProps {
     status: "Recruiting" | "In Progress" | "Completed";
   };
   onViewDetail: (id: string) => void;
+}
+
+function displaySkill(skill: string): string {
+  const key = skill.trim().toLowerCase();
+  return SKILL_DISPLAY_MAP[key] || skill.charAt(0).toUpperCase() + skill.slice(1);
 }
 
 export function ProjectCard({
@@ -84,7 +90,7 @@ export function ProjectCard({
               variant="outline"
               className="bg-indigo-50/80 text-indigo-700 border-indigo-200 hover:bg-indigo-100 transition-colors backdrop-blur-sm"
             >
-              {skill}
+              {displaySkill(skill)}
             </Badge>
           ))}
         </div>

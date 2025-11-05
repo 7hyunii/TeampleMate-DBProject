@@ -10,6 +10,7 @@ import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Label } from "./ui/label";
 import { Avatar, AvatarFallback } from "./ui/avatar";
+import { availableSkills, SKILL_DISPLAY_MAP } from "../constants/skills";
 
 interface ProfileManagementProps {
   currentUser: string;
@@ -26,20 +27,12 @@ export function ProfileManagement({ currentUser, onLogout }: ProfileManagementPr
   const [newSkill, setNewSkill] = useState("");
   const [saved, setSaved] = useState(false);
 
-  const availableSkills = [
-    // 언어
-    "JavaScript", "TypeScript", "Java", "Kotlin", "C", "C++", "C#", "Python", "Go", "Rust", "Swift", "PHP", "Ruby",
-    // 프론트엔드
-    "React", "Next.js", "Vue.js", "Nuxt.js", "Angular", "Svelte", "HTML", "CSS", "SCSS", "Tailwind CSS", "Styled Components",
-    // 백엔드/프레임워크
-    "Spring Boot", "Spring", "Django", "Flask", "Express.js", "FastAPI", "Node.js", "NestJS", "ASP.NET Core", "Laravel",
-    // 데이터베이스
-    "MySQL", "PostgreSQL", "MongoDB", "SQLite", "Oracle", "MariaDB",
-    // DevOps/클라우드
-    "Docker", "Kubernetes", "AWS", "GCP", "Azure", "Firebase", "Vercel", "Netlify", "Heroku", "Jenkins", "GitHub Actions",
-    // 협업/디자인
-    "Git", "GitHub", "GitLab", "Figma", "Zeplin", "Jira", "Notion", "Slack", "UI/UX",
-  ];
+
+function displaySkill(skill: string): string {
+  const key = skill.trim().toLowerCase();
+  return SKILL_DISPLAY_MAP[key] || skill.charAt(0).toUpperCase() + skill.slice(1);
+}
+
 
   // 로그인 후 글로벌 상태가 바뀌면 동기화
   useEffect(() => {
@@ -215,7 +208,7 @@ export function ProfileManagement({ currentUser, onLogout }: ProfileManagementPr
                     key={skill}
                     className="bg-primary text-primary-foreground gap-1 pr-1"
                   >
-                    {skill}
+                    {displaySkill(skill)}
                     <button
                       onClick={() => removeSkill(skill)}
                       className="ml-1 hover:bg-primary-foreground/20 rounded-full p-0.5"
