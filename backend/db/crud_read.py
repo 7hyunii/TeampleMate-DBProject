@@ -59,23 +59,31 @@ def get_student_profile_with_skills(uid: str):
 
 
 # 전체 프로젝트 목록 조회
-def get_all_projects(order_by: str = "deadline"):
+def get_all_projects(orderBy: str = "deadline", groupBy: str = "All"):
     conn = get_conn()
     try:
         with conn:
             with conn.cursor() as cur:
-                # 정렬 기준 동적으로 처리
-                if order_by == "capacity":
-                    order_sql = "ORDER BY p.capacity DESC, p.deadline ASC"
+                # 정렬 기준
+                if orderBy == "capacity":
+                    order_sql = "ORDER BY capacity DESC, deadline ASC"
                 else:
-                    order_sql = "ORDER BY p.deadline ASC"
-                query = f"""
-                    SELECT p.project_id, p.leader_id, p.topic, p.description1, p.capacity, p.deadline, p.status, s.name as leader_name
-                    FROM Projects p
-                    JOIN Students s ON p.leader_id = s.uid
-                    WHERE NOT (p.status = 'Recruiting' AND p.deadline < CURRENT_DATE)
-                    {order_sql}
-                """
+                    order_sql = "ORDER BY deadline ASC"
+                # 상태별 필터링
+                if groupBy == "Recruiting":
+                    query = f"SELECT * FROM RecruitingProjectsView {order_sql}"
+                elif groupBy == "In_Progress":
+                    query = f"SELECT * FROM InProgressProjectsView {order_sql}"
+                elif groupBy == "Completed":
+                    query = f"SELECT * FROM CompletedProjectsView {order_sql}"
+                else:
+                    query = f"""
+                        SELECT p.project_id, p.leader_id, p.topic, p.description1, p.capacity, p.deadline, p.status, s.name as leader_name
+                        FROM Projects p
+                        JOIN Students s ON p.leader_id = s.uid
+                        WHERE NOT (p.status = 'Recruiting' AND p.deadline < CURRENT_DATE)
+                        {order_sql}
+                    """
                 cur.execute(query)
                 projects = []
                 for row in cur.fetchall():
