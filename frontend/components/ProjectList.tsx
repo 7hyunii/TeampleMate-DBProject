@@ -8,14 +8,29 @@ import { ProjectCard } from './ProjectCard';
 import { useAuth } from './AuthProvider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Badge } from './ui/badge';
+import { SKILL_DISPLAY_MAP } from '@/constants/skills';
 
 interface ProjectListProps {
   onViewDetail: (id: string) => void;
   onCreateProject: () => void;
 }
 
+function displaySkill(skill: string): string {
+  const key = skill.trim().toLowerCase();
+  return SKILL_DISPLAY_MAP[key] || skill.charAt(0).toUpperCase() + skill.slice(1);
+}
 
-const allSkills = ['React', 'TypeScript', 'Node.js', 'Python', 'Spring Boot', 'MySQL', 'AI/ML', 'React Native', 'Solidity', 'Web3.js'];
+
+// 실제 프로젝트로 등록된 스킬들만 추출
+function getAllSkills(projects: any[]): string[] {
+  const skillSet = new Set<string>();
+  projects.forEach(project => {
+    if (Array.isArray(project.skills)) {
+      project.skills.forEach((skill: string) => skillSet.add(skill));
+    }
+  });
+  return Array.from(skillSet).sort();
+}
 
 
 
@@ -153,7 +168,7 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
               )}
             </div>
             <div className="flex flex-wrap gap-2">
-              {allSkills.map(skill => (
+              {getAllSkills(projects).map(skill => (
                 <Badge
                   key={skill}
                   variant="outline"
@@ -164,7 +179,7 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
                   }`}
                   onClick={() => toggleSkill(skill)}
                 >
-                  {skill}
+                  {displaySkill(skill)}
                 </Badge>
               ))}
             </div>
