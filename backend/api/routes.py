@@ -3,8 +3,8 @@ from tkinter.tix import STATUS
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from db.utils import hash_password, verify_password
-from db.crud import student_exists, create_student, update_student_profile, login_student, get_student_profile_with_skills
-from db.crud import create_project_with_skills, get_all_projects
+from db.crud_read import student_exists, login_student, get_student_profile_with_skills, get_all_projects
+from db.crud_write import create_student, update_student_profile, create_project_with_skills 
 router = APIRouter()
 
 class SignupRequest(BaseModel):
