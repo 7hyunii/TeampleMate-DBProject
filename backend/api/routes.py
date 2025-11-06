@@ -65,10 +65,10 @@ def root():
                 "desc": "프로젝트 탐색 화면 (View 기반 필터링)",
                 "params": {
                     "orderBy": "정렬 기준 (string, default: deadline, values: deadline, capacity)",
-                    "groupBy": "상태별 필터링 (string, default: All, values: All, Recruiting, In_Progress, Completed)"
+                    "groupBy": "상태별 필터링 (string, default: All, values: All, Recruiting, In_Progress, Completed)",
+                    "search": "검색어 (string, optional)"
                 },
-                "note": "groupBy=Recruiting/In_Progress/Completed 시 해당 상태의 View를 직접 조회합니다.",
-                "example": "/projects?orderBy=capacity&groupBy=Recruiting",
+                "example": "/projects?orderBy=capacity&groupBy=Recruiting&search=AI",
                 "response": "{ projects: [...] }"
             }
         ]
@@ -135,15 +135,16 @@ def create_project(req: ProjectCreateRequest):
 
 # 프로젝트 탐색 화면
 @router.get("/projects")
-def get_projects(orderBy: str = "deadline", groupBy: str = "All"):
+def get_projects(orderBy: str = "deadline", groupBy: str = "All", search: str = ""):
     """
     프로젝트 목록 조회 (View 기반 상태별 필터링)
     
     - orderBy: 정렬 기준 (deadline/capacity)
     - groupBy: 상태별 필터링 (All/Recruiting/In_Progress/Completed)
+    - search: 검색어 (string, optional)
     """
     try:
-        projects = get_all_projects(orderBy, groupBy)
+        projects = get_all_projects(orderBy, groupBy, search)
         return {"projects": projects}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

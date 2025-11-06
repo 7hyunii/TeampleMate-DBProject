@@ -59,24 +59,43 @@ def get_student_profile_with_skills(uid: str):
 
 
 # 전체 프로젝트 목록 조회
-def get_all_projects(orderBy: str = "deadline", groupBy: str = "All"):
+def get_all_projects(orderBy: str = "deadline", groupBy: str = "All", search: str = ""):
     conn = get_conn()
     try:
         with conn:
             with conn.cursor() as cur:
-                # 정렬 기준
+                # 정렬 기준 결정
                 if orderBy == "capacity":
                     order_sql = "ORDER BY capacity DESC, deadline ASC"
                 else:
                     order_sql = "ORDER BY deadline ASC"
-                # 상태별 필터링
-                if groupBy == "Recruiting":
-                    query = f"SELECT * FROM RecruitingProjectsView {order_sql}"
-                elif groupBy == "In_Progress":
-                    query = f"SELECT * FROM InProgressProjectsView {order_sql}"
-                elif groupBy == "Completed":
-                    query = f"SELECT * FROM CompletedProjectsView {order_sql}"
-                else:
+
+                # 검색어가 있을 경우 like_pattern 생성
+                like_pattern = f"%{search.strip()}%" if search and search.strip() else None
+
+                # groupBy 조건별로 쿼리 실행
+                if groupBy == "Recruiting":  # 모집중 프로젝트만 조회 (view 사용)
+                    if like_pattern:  # 검색어가 있을 때: topic 또는 description1에 대해 검색
+                        query = f"SELECT * FROM RecruitingProjectsView WHERE topic ILIKE %s OR description1 ILIKE %s {order_sql}"
+                        cur.execute(query, (like_pattern, like_pattern))
+                    else:   # 검색어 없이 전체 모집중 프로젝트 조회
+                        query = f"SELECT * FROM RecruitingProjectsView {order_sql}"
+                        cur.execute(query)
+                elif groupBy == "In_Progress":  # 진행중 프로젝트만 조회 (view 사용)
+                    if like_pattern:    # 검색어가 있을 때: topic 또는 description1에 대해 검색
+                        query = f"SELECT * FROM InProgressProjectsView WHERE topic ILIKE %s OR description1 ILIKE %s {order_sql}"
+                        cur.execute(query, (like_pattern, like_pattern))
+                    else:   # 검색어 없이 전체 진행중 프로젝트 조회
+                        query = f"SELECT * FROM InProgressProjectsView {order_sql}"
+                        cur.execute(query)
+                elif groupBy == "Completed":  # 완료된 프로젝트만 조회 (view 사용)
+                    if like_pattern:    # 검색어가 있을 때: topic 또는 description1에 대해 검색
+                        query = f"SELECT * FROM CompletedProjectsView WHERE topic ILIKE %s OR description1 ILIKE %s {order_sql}"
+                        cur.execute(query, (like_pattern, like_pattern))
+                    else:   # 검색어 없이 전체 완료 프로젝트 조회
+                        query = f"SELECT * FROM CompletedProjectsView {order_sql}"
+                        cur.execute(query)
+                else:   # 전체 프로젝트(상태 제한 없음) 조회
                     query = f"""
                         SELECT p.project_id, p.leader_id, p.topic, p.description1, p.capacity, p.deadline, p.status, s.name as leader_name
                         FROM Projects p
@@ -84,7 +103,15 @@ def get_all_projects(orderBy: str = "deadline", groupBy: str = "All"):
                         WHERE NOT (p.status = 'Recruiting' AND p.deadline < CURRENT_DATE)
                         {order_sql}
                     """
-                cur.execute(query)
+                    if like_pattern:
+                        # 검색어가 있을 때: topic 또는 description1에 대해 검색
+                        query = query.replace("WHERE NOT (p.status = 'Recruiting' AND p.deadline < CURRENT_DATE)",
+                            "WHERE NOT (p.status = 'Recruiting' AND p.deadline < CURRENT_DATE) AND (p.topic ILIKE %s OR p.description1 ILIKE %s)")
+                        cur.execute(query, (like_pattern, like_pattern))
+                    else:
+                        # 검색어 없이 전체 프로젝트 조회
+                        cur.execute(query)
+                
                 projects = []
                 for row in cur.fetchall():
                     project = {

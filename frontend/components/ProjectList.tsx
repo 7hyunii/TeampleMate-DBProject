@@ -35,15 +35,21 @@ function getAllSkills(projects: any[]): string[] {
 
 
 export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [statusFilter, setStatusFilter] = useState<string>('All');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState('deadline');
   const { isLoggedIn, openAuthModal } = useAuth();
   const [projects, setProjects] = useState<any[]>([]);
+  const [searchInput, setSearchInput] = useState('');
 
   useEffect(() => {
-    fetch(`http://localhost:8000/projects?orderBy=${sortBy}`)
+    const params = new URLSearchParams();
+    params.append('orderBy', sortBy);
+    params.append('groupBy', statusFilter);
+    if (searchInput.trim() !== "") {
+      params.append('search', searchInput.trim());
+    }
+    fetch(`http://localhost:8000/projects?${params.toString()}`)
       .then(res => res.ok ? res.json() : Promise.reject(res))
       .then(data => {
         setProjects(data.projects.map((p: any) => ({
@@ -60,7 +66,7 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
         })));
       })
       .catch(() => setProjects([]));
-  }, [sortBy]);
+  }, [sortBy, statusFilter, searchInput]);
 
   const toggleSkill = (skill: string) => {
     setSelectedSkills(prev =>
@@ -70,20 +76,12 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
     );
   };
 
+  // 검색어 필터링은 백엔드에서만 처리
   const filteredProjects = projects
     .filter(project => {
-      const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (project.description?.toLowerCase().includes(searchTerm.toLowerCase()));
-      const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
       const matchesSkills = selectedSkills.length === 0 ||
         selectedSkills.some(skill => project.skills.includes(skill));
-      return matchesSearch && matchesStatus && matchesSkills;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'deadline') {
-        return new Date(a.deadline).getTime() - new Date(b.deadline).getTime();
-      }
-      return 0;
+      return matchesSkills;
     });
 
   const handleCreateProject = () => {
@@ -122,8 +120,8 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
               </div>
               <Input
                 placeholder="프로젝트 검색..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
                 className="pl-12 h-11 bg-white border-slate-200 shadow-sm"
               />
             </div>
@@ -133,9 +131,9 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">전체 상태</SelectItem>
+                  <SelectItem value="All">전체 상태</SelectItem>
                   <SelectItem value="Recruiting">모집중</SelectItem>
-                  <SelectItem value="In Progress">진행중</SelectItem>
+                  <SelectItem value="In_Progress">진행중</SelectItem>
                   <SelectItem value="Completed">완료</SelectItem>
                 </SelectContent>
               </Select>
@@ -216,11 +214,11 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
           </div>
           <h3 className="text-slate-900 mb-2">프로젝트를 찾을 수 없습니다</h3>
           <p className="text-slate-500 text-sm mb-6">검색 조건을 변경하거나 필터를 초기화해보세요</p>
-          {(searchTerm || statusFilter !== 'all' || selectedSkills.length > 0) && (
+          {(searchInput || statusFilter !== 'all' || selectedSkills.length > 0) && (
             <Button 
               variant="outline" 
               onClick={() => {
-                setSearchTerm('');
+                setSearchInput('');
                 setStatusFilter('all');
                 setSelectedSkills([]);
               }}
