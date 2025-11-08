@@ -51,7 +51,8 @@ function displaySkill(skill: string): string {
 
   const addSkill = (skill: string) => {
     const normalized = skill.trim().toLowerCase();
-    if (normalized && !skills.includes(normalized)) {
+    const alreadySelected = skills.map(s => s.trim().toLowerCase()).includes(normalized);
+    if (normalized && !alreadySelected) {
       setSkills([...skills, normalized]);
       setNewSkill("");
     }
@@ -248,23 +249,27 @@ function displaySkill(skill: string): string {
                   추천 스킬
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {availableSkills.map((skill) => (
-                    <Badge
-                      key={skill}
-                      variant="outline"
-                      className={`cursor-pointer transition-all ${
-                        skills.includes(skill)
-                          ? "opacity-50 cursor-not-allowed"
-                          : "hover:bg-indigo-50 hover:border-indigo-200"
-                      }`}
-                      onClick={() =>
-                        !skills.includes(skill) &&
-                        addSkill(skill)
-                      }
-                    >
-                      {skill}
-                    </Badge>
-                  ))}
+                  {availableSkills.map((skill) => {
+                    const normalized = skill.trim().toLowerCase();
+                    const isSelected = skills.map(s => s.trim().toLowerCase()).includes(normalized);
+                    return (
+                      <Badge
+                        key={skill}
+                        variant="outline"
+                        className={`cursor-pointer transition-all ${
+                          isSelected
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:bg-indigo-50 hover:border-indigo-200"
+                        }`}
+                        onClick={() =>
+                          !isSelected &&
+                          addSkill(skill)
+                        }
+                      >
+                        {skill}
+                      </Badge>
+                    );
+                  })}
                 </div>
               </div>
             </div>

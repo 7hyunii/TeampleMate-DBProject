@@ -73,12 +73,7 @@ export function ProjectDetail({
   }, [projectId, currentUserId]);
 
   if (!project) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">프로젝트를 찾을 수 없습니다.</p>
-        <Button onClick={onBack} className="mt-4">돌아가기</Button>
-      </div>
-    );
+    return <div className="min-h-[800px] bg-white w-full" />;
   }
 
   const ProjectDetails = {
@@ -151,7 +146,7 @@ export function ProjectDetail({
 
   return (
     <div className="space-y-4 md:space-y-6">
-      <div className="flex items-center gap-3">
+  <div className="flex items-center gap-3">
         <Button
           variant="ghost"
           onClick={onBack}
@@ -163,8 +158,8 @@ export function ProjectDetail({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
-        <div className="lg:col-span-2 space-y-4 md:space-y-6">
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+    <div className="lg:col-span-2 space-y-4 md:space-y-6">
           <Card className="p-4 md:p-8 shadow-lg bg-gradient-to-br from-white to-slate-50/30">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-6">
               <div className="flex-1">
@@ -264,7 +259,7 @@ export function ProjectDetail({
           </Card>
         </div>
 
-        <div className="space-y-6">
+  <div className="space-y-6">
           <Card className="p-6 shadow-lg bg-gradient-to-br from-white via-white to-indigo-50/30">
             <h3 className="mb-5 text-slate-900">
               프로젝트 정보

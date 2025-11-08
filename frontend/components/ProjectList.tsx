@@ -208,7 +208,7 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
 
       {/* Empty State */}
       {filteredProjects.length === 0 && (
-        <div className="text-center py-16 px-4">
+        <div className="text-center py-16 px-4 min-h-[500px] flex flex-col justify-center max-w-md mx-auto">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full mb-4">
             <Search className="h-10 w-10 text-slate-400" />
           </div>
@@ -219,7 +219,7 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
               variant="outline" 
               onClick={() => {
                 setSearchInput('');
-                setStatusFilter('all');
+                setStatusFilter('All');
                 setSelectedSkills([]);
               }}
               className="gap-2"

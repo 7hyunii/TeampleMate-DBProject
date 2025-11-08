@@ -57,6 +57,7 @@ export const SKILL_DISPLAY_MAP: Record<string, string> = {
   "php": "PHP",
   "postgresql": "PostgreSQL",
   "python": "Python",
+  "pytorch": "PyTorch",
   "react": "React",
   "react native": "React Native",
   "redis": "Redis",

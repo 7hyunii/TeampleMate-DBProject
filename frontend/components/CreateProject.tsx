@@ -43,7 +43,9 @@ export function CreateProject({ onBack, onSubmit }: CreateProjectProps) {
   };
 
   const addCustomSkill = () => {
-    if (customSkill.trim() && !selectedSkills.includes(customSkill.trim())) {
+    const normalized = customSkill.trim().toLowerCase();
+    const alreadySelected = selectedSkills.map(s => s.trim().toLowerCase()).includes(normalized);
+    if (customSkill.trim() && !alreadySelected) {
       setSelectedSkills([...selectedSkills, customSkill.trim()]);
       setCustomSkill('');
     }
@@ -204,20 +206,24 @@ export function CreateProject({ onBack, onSubmit }: CreateProjectProps) {
               <div className="border-t pt-3">
                 <p className="text-xs text-slate-600 mb-2 font-medium">추천 스킬</p>
                 <div className="flex flex-wrap gap-2">
-                  {availableSkills.map(skill => (
-                    <Badge
-                      key={skill}
-                      variant="outline"
-                      className={`cursor-pointer transition-all ${
-                        selectedSkills.includes(skill)
-                          ? 'opacity-50 cursor-not-allowed'
-                          : 'hover:bg-indigo-50 hover:border-indigo-200'
-                      }`}
-                      onClick={() => !selectedSkills.includes(skill) && toggleSkill(skill)}
-                    >
-                      {skill}
-                    </Badge>
-                  ))}
+                  {availableSkills.map(skill => {
+                    const normalized = skill.trim().toLowerCase();
+                    const isSelected = selectedSkills.map(s => s.trim().toLowerCase()).includes(normalized);
+                    return (
+                      <Badge
+                        key={skill}
+                        variant="outline"
+                        className={`cursor-pointer transition-all ${
+                          isSelected
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'hover:bg-indigo-50 hover:border-indigo-200'
+                        }`}
+                        onClick={() => !isSelected && toggleSkill(skill)}
+                      >
+                        {skill}
+                      </Badge>
+                    );
+                  })}
                 </div>
               </div>
             </div>
