@@ -3,8 +3,8 @@ from tkinter.tix import STATUS
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from db.utils import hash_password, verify_password
-from db.crud_read import student_exists, login_student, get_student_profile_with_skills, get_all_projects
-from db.crud_write import create_student, update_student_profile, create_project_with_skills 
+from db.crud_read import student_exists, login_student, get_student_profile_with_skills, get_all_projects, get_project_details
+from db.crud_write import create_student, update_student_profile, create_project_with_skills
 router = APIRouter()
 
 class SignupRequest(BaseModel):
@@ -70,7 +70,8 @@ def root():
                 },
                 "example": "/projects?orderBy=capacity&groupBy=Recruiting&search=AI",
                 "response": "{ projects: [...] }"
-            }
+            },
+            {"path": "/projects/{project_id}", "method": "GET", "desc": "프로젝트 상세 정보 조회"}
         ]
     }
 
@@ -149,3 +150,12 @@ def get_projects(orderBy: str = "deadline", groupBy: str = "All", search: str = 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@router.get("/projects/{project_id}")
+def get_details(project_id: int):
+    """
+    프로젝트 상세 정보 조회
+    """
+    result = get_project_details(project_id)
+    if not result:
+        raise HTTPException(status_code=404, detail="해당 프로젝트를 찾을 수 없습니다.")
+    return result

@@ -50,6 +50,7 @@ export const SKILL_DISPLAY_MAP: Record<string, string> = {
   "nestjs": "NestJS",
   "netlify": "Netlify",
   "next.js": "Next.js",
+  "node.js": "Node.js",
   "notion": "Notion",
   "nuxt.js": "Nuxt.js",
   "oracle": "Oracle",

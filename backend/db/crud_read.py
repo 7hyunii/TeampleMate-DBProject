@@ -141,3 +141,43 @@ def get_all_projects(orderBy: str = "deadline", groupBy: str = "All", search: st
     finally:
         put_conn(conn)
 
+
+def get_project_details(project_id: int):
+    conn = get_conn()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                # 프로젝트 기본 정보 조회
+                cur.execute("""
+                    SELECT p.project_id, p.leader_id, s.name as leader_name, p.topic, p.description1, p.description2,
+                           p.capacity, p.deadline, p.status
+                    FROM Projects p
+                    JOIN Students s ON p.leader_id = s.uid
+                    WHERE p.project_id = %s
+                """, (project_id,))
+                row = cur.fetchone()
+                if not row:
+                    return None
+                project = {
+                    "project_id": row[0],
+                    "leader_id": row[1],
+                    "leader_name": row[2],
+                    "topic": row[3],
+                    "description1": row[4],
+                    "description2": row[5],
+                    "capacity": row[6],
+                    "deadline": row[7],
+                    "status": row[8],
+                }
+
+                # 요구 스킬 목록 조회
+                cur.execute("""
+                    SELECT s.skill_name FROM Skills s
+                    JOIN Project_Required_Skills prs ON s.skill_id = prs.skill_id
+                    WHERE prs.project_id = %s
+                """, (project_id,))
+                project["skills"] = [r[0] for r in cur.fetchall()]
+
+                return project
+    finally:
+        put_conn(conn)

@@ -222,7 +222,7 @@ function displaySkill(skill: string): string {
               <div className="mb-3">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="스킬 직접 입력..."
+                    placeholder="스킬 직접 입력... (예: Python, C++ 등 정확한 스킬 이름을 입력해 주세요)"
                     value={newSkill}
                     onChange={(e) =>
                       setNewSkill(e.target.value)

@@ -184,7 +184,7 @@ export function CreateProject({ onBack, onSubmit }: CreateProjectProps) {
               <div className="mb-3">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="직접 입력..."
+                    placeholder="스킬 직접 입력... (예: Python, C++ 등 정확한 스킬 이름을 입력해 주세요)"
                     value={customSkill}
                     onChange={(e) => setCustomSkill(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && addCustomSkill()}

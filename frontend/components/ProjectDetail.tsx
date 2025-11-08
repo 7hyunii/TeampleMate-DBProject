@@ -7,12 +7,35 @@ import {
   Clock,
   User,
   Send,
-} from "lucide-react";
+  } from "lucide-react";
+import { SKILL_DISPLAY_MAP } from "../constants/skills";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Textarea } from "./ui/textarea";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+interface Member {
+  id: string;
+  name: string;
+  role: string;
+  skills: string[];
+}
+
+interface Project {
+  project_id: number;
+  leader_id: string;
+  leader_name: string;
+  topic: string;
+  description1: string;
+  description2: string;
+  skills: string[];
+  capacity: number;
+  deadline: string;
+  status: "Recruiting" | "In Progress" | "Completed";
+  members: Member[];
+  current_members: number;
+}
 
 interface ProjectDetailProps {
   projectId: string;
@@ -20,40 +43,54 @@ interface ProjectDetailProps {
   currentUserId: string;
 }
 
-// === 모킹 데이터 시작 ===
-const mockProjectDetails = {
-  "1": {
-    id: "1",
-    title: "AI 기반 학습 도우미 앱 개발",
-    description:
-      "ChatGPT API를 활용한 학생들을 위한 학습 도우미 애플리케이션을 개발합니다. React Native로 크로스 플랫폼 앱을 만들 예정입니다.",
-    fullDescription: `이 프로젝트는 AI 기술을 활용하여 학생들의 학습을 도와주는 모바일 애플리케이션을 개발하는 것을 목표로 합니다.
 
-주요 기능:
-- ChatGPT API를 활용한 질문-답변 시스템
-- 학습 진도 추적 및 분석
-- 개인화된 학습 추천
-- 플래시카드 자동 생성
-- 학습 통계 대시보드
+export function ProjectDetail({
+  projectId,
+  onBack,
+  currentUserId,
+}: ProjectDetailProps) {
+  const [motivation, setMotivation] = useState("");
+  const [applied, setApplied] = useState(false);
+  const [project, setProject] = useState<Project | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-기술 스택:
-- Frontend: React Native, TypeScript
-- Backend: Node.js, Express
-- Database: MongoDB
-- AI: OpenAI API
+  useEffect(() => {
+    setLoading(true);
+    setError("");
+    fetch(`http://localhost:8000/projects/${projectId}`)
+      .then((res) => {
+        if (!res.ok) throw new Error("프로젝트 정보를 불러올 수 없습니다.");
+        return res.json();
+      })
+      .then((data) => setProject(data))
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
+  }, [projectId]);
 
-예상 일정:
-- 1-2주차: 기획 및 설계
-- 3-6주차: 개발
-- 7-8주차: 테스트 및 배포`,
-    leader: "김민수",
-    leaderId: "user1",
-    skills: ["React Native", "TypeScript", "Node.js", "AI/ML"],
-    capacity: 5,
-    currentMembers: 2,
-    deadline: "2025-11-15",
-    status: "Recruiting" as const,
-    members: [
+  if (!project) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">프로젝트를 찾을 수 없습니다.</p>
+        <Button onClick={onBack} className="mt-4">돌아가기</Button>
+      </div>
+    );
+  }
+
+  const ProjectDetails = {
+    id: project.project_id,
+    leaderId: project.leader_id,
+    leader: project.leader_name,
+    title: project.topic,
+    description: project.description1,
+    fullDescription: project.description2,
+    skills: project.skills,
+    capacity: project.capacity,
+    currentMembers: 0,
+    deadline: project.deadline,
+    status: project.status,
+    members: [  // 팀원 정보
+      // 예시 mock
       {
         id: "user1",
         name: "김민수",
@@ -67,41 +104,12 @@ const mockProjectDetails = {
         skills: ["Node.js", "MongoDB"],
       },
     ],
-  },
-};
-// === 모킹 데이터 끝 ===
+  };
 
-export function ProjectDetail({
-  projectId,
-  onBack,
-  currentUserId,
-}: ProjectDetailProps) {
-  const [motivation, setMotivation] = useState("");
-  const [applied, setApplied] = useState(false);
-
-  const project =
-    mockProjectDetails[
-      projectId as keyof typeof mockProjectDetails
-    ];
-
-  if (!project) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">
-          프로젝트를 찾을 수 없습니다.
-        </p>
-        <Button onClick={onBack} className="mt-4">
-          돌아가기
-        </Button>
-      </div>
-    );
-  }
-
-  const isLeader = project.leaderId === currentUserId;
+  const isLeader = ProjectDetails.leaderId === currentUserId;
   const daysUntilDeadline = Math.ceil(
-    (new Date(project.deadline).getTime() -
-      new Date().getTime()) /
-      (1000 * 60 * 60 * 24),
+    (new Date(ProjectDetails.deadline).getTime() - new Date().getTime()) /
+      (1000 * 60 * 60 * 24)
   );
 
   const handleApply = () => {
@@ -139,46 +147,49 @@ export function ProjectDetail({
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-6">
               <div className="flex-1">
                 <h2 className="mb-2 md:mb-3 text-slate-900 text-xl md:text-2xl">
-                  {project.title}
+                  {ProjectDetails.title}
                 </h2>
                 <div className="flex items-center gap-2 text-sm text-slate-600 bg-slate-100/70 px-3 py-1.5 rounded-lg w-fit">
                   <User className="h-4 w-4 text-indigo-600" />
                   <span>
                     리더:{" "}
                     <span className="font-medium text-slate-700">
-                      {project.leader}
+                      {ProjectDetails.leader}
                     </span>
                   </span>
                 </div>
               </div>
               <Badge
-                className={`${statusColors[project.status]} shadow-sm px-4 py-1.5 w-fit`}
+                className={`${statusColors[ProjectDetails.status]} shadow-sm px-4 py-1.5 w-fit`}
               >
-                {project.status === "Recruiting"
+                {ProjectDetails.status === "Recruiting"
                   ? "모집중"
-                  : project.status === "In Progress"
+                  : ProjectDetails.status === "In Progress"
                     ? "진행중"
                     : "완료"}
               </Badge>
             </div>
 
             <div className="flex flex-wrap gap-2 mb-6">
-              {project.skills.map((skill, idx) => (
-                <Badge
-                  key={idx}
-                  variant="outline"
-                  className="bg-indigo-50/80 text-indigo-700 border-indigo-200 px-3 py-1"
-                >
-                  {skill}
-                </Badge>
-              ))}
+              {ProjectDetails.skills.map((skill: string, idx: number) => {
+                const display = SKILL_DISPLAY_MAP[skill.toLowerCase()] || (skill.charAt(0).toUpperCase() + skill.slice(1));
+                return (
+                  <Badge
+                    key={idx}
+                    variant="outline"
+                    className="bg-indigo-50/80 text-indigo-700 border-indigo-200 px-3 py-1"
+                  >
+                    {display}
+                  </Badge>
+                );
+              })}
             </div>
 
             <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-6" />
 
             <div className="prose max-w-none">
               <p className="text-slate-700 whitespace-pre-line leading-relaxed">
-                {project.fullDescription}
+                {ProjectDetails.fullDescription}
               </p>
             </div>
           </Card>
@@ -189,12 +200,12 @@ export function ProjectDetail({
                 <Users className="h-4 w-4 text-white" />
               </div>
               <h3 className="text-slate-900">
-                팀원 ({project.members.length}/
-                {project.capacity})
+                팀원 ({ProjectDetails.currentMembers}/
+                {ProjectDetails.capacity})
               </h3>
             </div>
             <div className="space-y-3">
-              {project.members.map((member) => (
+              {ProjectDetails.members.map((member) => (
                 <div
                   key={member.id}
                   className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-shadow"
@@ -246,7 +257,7 @@ export function ProjectDetail({
                     모집 인원
                   </div>
                   <div className="font-semibold text-slate-900">
-                    {project.currentMembers}/{project.capacity}
+                    {ProjectDetails.currentMembers}/{ProjectDetails.capacity}
                     명
                   </div>
                 </div>
@@ -260,7 +271,7 @@ export function ProjectDetail({
                     모집 마감
                   </div>
                   <div className="font-semibold text-slate-900">
-                    {project.deadline}
+                    {ProjectDetails.deadline}
                   </div>
                 </div>
               </div>
@@ -290,7 +301,7 @@ export function ProjectDetail({
             </div>
           </Card>
 
-          {!isLeader && project.status === "Recruiting" && (
+          {!isLeader && ProjectDetails.status === "Recruiting" && (
             <Card className="p-6 shadow-lg bg-gradient-to-br from-white to-indigo-50/20">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
