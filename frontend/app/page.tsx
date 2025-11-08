@@ -26,7 +26,7 @@ type View =
 export default function Home() {
   const [currentView, setCurrentView] = useState<View>('projects');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
-  const { userName } = useAuth();
+  const { userId, userName } = useAuth();
 
   const handleViewDetail = (projectId: string) => {
     setSelectedProjectId(projectId);
@@ -87,7 +87,8 @@ export default function Home() {
           <ProjectDetail
             projectId={selectedProjectId}
             onBack={handleBack}
-            currentUserId={userName}
+            currentUserId={userId}
+            onManageApplicants={handleManageApplicants}
           />
         )}
         

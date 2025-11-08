@@ -20,11 +20,11 @@ def login_student(uid: str, password: str, verify_password_func):
     try:
         with conn:
             with conn.cursor() as cur:  
-                cur.execute("SELECT hashed_password, name, email, profile_text, website_link FROM Students WHERE uid=%s", (uid,))
+                cur.execute("SELECT hashed_password, uid, name, email, profile_text, website_link FROM Students WHERE uid=%s", (uid,))
                 row = cur.fetchone()
                 if not row or not verify_password_func(password, row[0]):
                     return None
-                return (row[1], row[2], row[3] or "", row[4] or "")
+                return (row[1], row[2], row[3], row[4] or "", row[5] or "")
     finally:
         put_conn(conn)
 
@@ -142,7 +142,7 @@ def get_all_projects(orderBy: str = "deadline", groupBy: str = "All", search: st
         put_conn(conn)
 
 
-def get_project_details(project_id: int):
+def get_project_details(project_id: int, applicant_id: str = None):
     conn = get_conn()
     try:
         with conn:
@@ -177,6 +177,20 @@ def get_project_details(project_id: int):
                     WHERE prs.project_id = %s
                 """, (project_id,))
                 project["skills"] = [r[0] for r in cur.fetchall()]
+
+                # 지원 가능 여부 검사 (가능하면 True, 불가능하면 False)
+                if applicant_id:
+                    # 리더 본인은 지원 불가
+                    if applicant_id == project["leader_id"]:
+                        project["can_apply"] = False
+                    else:
+                        cur.execute(
+                            "SELECT 1 FROM Applications WHERE project_id=%s AND applicant_id=%s",
+                            (project_id, applicant_id)
+                        )
+                        project["can_apply"] = not bool(cur.fetchone())
+                else:
+                    project["can_apply"] = True
 
                 return project
     finally:

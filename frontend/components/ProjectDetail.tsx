@@ -33,6 +33,7 @@ interface Project {
   capacity: number;
   deadline: string;
   status: "Recruiting" | "In Progress" | "Completed";
+  can_apply: boolean;
   members: Member[];
   current_members: number;
 }
@@ -41,6 +42,7 @@ interface ProjectDetailProps {
   projectId: string;
   onBack: () => void;
   currentUserId: string;
+  onManageApplicants?: (projectId: string) => void;
 }
 
 
@@ -48,6 +50,7 @@ export function ProjectDetail({
   projectId,
   onBack,
   currentUserId,
+  onManageApplicants,
 }: ProjectDetailProps) {
   const [motivation, setMotivation] = useState("");
   const [applied, setApplied] = useState(false);
@@ -58,7 +61,8 @@ export function ProjectDetail({
   useEffect(() => {
     setLoading(true);
     setError("");
-    fetch(`http://localhost:8000/projects/${projectId}`)
+    // applicant_id를 쿼리로 넘겨서 지원 가능 여부 포함된 project 정보 받기
+    fetch(`http://localhost:8000/projects/${projectId}?applicant_id=${currentUserId}`)
       .then((res) => {
         if (!res.ok) throw new Error("프로젝트 정보를 불러올 수 없습니다.");
         return res.json();
@@ -66,7 +70,7 @@ export function ProjectDetail({
       .then((data) => setProject(data))
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [projectId]);
+  }, [projectId, currentUserId]);
 
   if (!project) {
     return (
@@ -89,6 +93,7 @@ export function ProjectDetail({
     currentMembers: 0,
     deadline: project.deadline,
     status: project.status,
+    can_apply: project.can_apply,
     members: [  // 팀원 정보
       // 예시 mock
       {
@@ -112,10 +117,27 @@ export function ProjectDetail({
       (1000 * 60 * 60 * 24)
   );
 
-  const handleApply = () => {
-    if (motivation.trim()) {
+  const handleApply = async () => {
+    if (!motivation.trim()) return;
+    try {
+      const res = await fetch("http://localhost:8000/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          project_id: project?.project_id,
+          applicant_id: currentUserId,
+          motivation,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.detail || "지원에 실패했습니다.");
+        return;
+      }
       setApplied(true);
       setMotivation("");
+    } catch (err) {
+      alert("서버 오류로 지원에 실패했습니다.");
     }
   };
 
@@ -311,41 +333,52 @@ export function ProjectDetail({
                   프로젝트 지원
                 </h3>
               </div>
-              {!applied ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm text-slate-700 mb-2 block font-medium">
-                      지원 동기
-                    </label>
-                    <Textarea
-                      placeholder="이 프로젝트에 지원하는 이유와 기여할 수 있는 부분을 작성해주세요..."
-                      value={motivation}
-                      onChange={(e) =>
-                        setMotivation(e.target.value)
-                      }
-                      rows={6}
-                      className="bg-white border-slate-200"
-                    />
+              {project && ProjectDetails.can_apply ? (
+                !applied ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-sm text-slate-700 mb-2 block font-medium">
+                        지원 동기
+                      </label>
+                      <Textarea
+                        placeholder="이 프로젝트에 지원하는 이유와 기여할 수 있는 부분을 작성해주세요..."
+                        value={motivation}
+                        onChange={(e) =>
+                          setMotivation(e.target.value)
+                        }
+                        rows={6}
+                        className="bg-white border-slate-200"
+                      />
+                    </div>
+                    <Button
+                      onClick={handleApply}
+                      className="w-full gap-2 shadow-md hover:shadow-lg transition-shadow"
+                      disabled={!motivation.trim()}
+                    >
+                      <Send className="h-4 w-4" />
+                      지원하기
+                    </Button>
                   </div>
-                  <Button
-                    onClick={handleApply}
-                    className="w-full gap-2 shadow-md hover:shadow-lg transition-shadow"
-                    disabled={!motivation.trim()}
-                  >
-                    <Send className="h-4 w-4" />
-                    지원하기
-                  </Button>
-                </div>
+                ) : (
+                  <div className="text-center py-8 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
+                    <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full mb-4 shadow-lg">
+                      <Send className="h-8 w-8 text-white" />
+                    </div>
+                    <p className="text-emerald-700 font-semibold text-lg mb-1">
+                      지원이 완료되었습니다!
+                    </p>
+                    <p className="text-sm text-slate-600">
+                      리더의 승인을 기다려주세요.
+                    </p>
+                  </div>
+                )
               ) : (
-                <div className="text-center py-8 bg-gradient-to-br from-emerald-50 to-green-50 rounded-xl border border-emerald-200">
-                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full mb-4 shadow-lg">
+                <div className="text-center py-8 bg-gradient-to-br from-slate-50 to-gray-100 rounded-xl border border-slate-200">
+                  <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full mb-4 shadow-lg">
                     <Send className="h-8 w-8 text-white" />
                   </div>
-                  <p className="text-emerald-700 font-semibold text-lg mb-1">
-                    지원이 완료되었습니다!
-                  </p>
-                  <p className="text-sm text-slate-600">
-                    리더의 승인을 기다려주세요.
+                  <p className="text-slate-700 font-semibold text-lg mb-1">
+                    이미 지원한 프로젝트입니다.
                   </p>
                 </div>
               )}
@@ -353,7 +386,10 @@ export function ProjectDetail({
           )}
 
           {isLeader && (
-            <Button onClick={() => {}} className="w-full">
+            <Button
+              onClick={() => onManageApplicants && onManageApplicants(projectId)}
+              className="w-full"
+            >
               지원자 관리
             </Button>
           )}

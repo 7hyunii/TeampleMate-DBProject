@@ -1,5 +1,6 @@
 # Transaction O (with commit/rollback)
 from db.database import get_conn, put_conn
+from db.crud_read import get_project_details
 
 # 회원 정보 생성 (회원가입)
 def create_student(uid: str, name: str, hashed_password: str):
@@ -79,5 +80,19 @@ def create_project_with_skills(leader_id, topic, description1, description2, cap
                         "INSERT INTO Project_Required_Skills (project_id, skill_id) SELECT %s, skill_id FROM Skills WHERE skill_name=%s",
                         (project_id, skill.lower())
                     )
+    finally:
+        put_conn(conn)
+
+# 프로젝트 지원
+def apply_to_project(project_id: int, applicant_id: str, motivation: str):
+    conn = get_conn()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                project = get_project_details(project_id, applicant_id)
+                cur.execute(
+                    "INSERT INTO Applications (project_id, applicant_id, motivation) VALUES (%s, %s, %s)",
+                    (project_id, applicant_id, motivation)
+                )
     finally:
         put_conn(conn)
