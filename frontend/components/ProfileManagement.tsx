@@ -116,8 +116,8 @@ function displaySkill(skill: string): string {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1">
-            <h3 className="mb-2 text-slate-900">{name}</h3>
-            <p className="text-sm text-slate-600 mb-1">{email}</p>
+            <h3 className="font-medium mb-2 text-slate-900">{name}</h3>
+            <p className="font-normal text-sm text-slate-600 mb-1">{email}</p>
             <div className="inline-flex items-center gap-2 mt-2 px-3 py-1.5 bg-indigo-50 rounded-lg">
               <span className="text-xs font-medium text-indigo-700">
                 내 ID: {userId}

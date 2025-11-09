@@ -65,7 +65,7 @@ export function ProjectCard({
 
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">
-          <h3 className="flex-1 group-hover:text-indigo-600 transition-colors leading-tight pr-3">
+          <h3 className="font-semibold flex-1 group-hover:text-indigo-600 transition-colors leading-tight pr-3">
             {project.title}
           </h3>
           <Badge

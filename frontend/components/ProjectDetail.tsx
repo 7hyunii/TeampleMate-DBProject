@@ -169,7 +169,7 @@ export function ProjectDetail({
           <Card className="p-4 md:p-8 shadow-lg bg-gradient-to-br from-white to-slate-50/30">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-6">
               <div className="flex-1">
-                <h2 className="mb-2 md:mb-3 text-slate-900 text-xl md:text-2xl">
+                <h2 className="font-semibold mb-2 md:mb-3 text-slate-900 text-xl md:text-2xl">
                   {ProjectDetails.title}
                 </h2>
                 <div className="flex items-center gap-2 text-sm text-slate-600 bg-slate-100/70 px-3 py-1.5 rounded-lg w-fit">
@@ -222,7 +222,7 @@ export function ProjectDetail({
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                 <Users className="h-4 w-4 text-white" />
               </div>
-              <h3 className="text-slate-900">
+              <h3 className="font-semibold text-slate-900">
                 팀원 ({ProjectDetails.currentMembers}/
                 {ProjectDetails.capacity})
               </h3>
@@ -267,7 +267,7 @@ export function ProjectDetail({
 
   <div className="space-y-6">
           <Card className="p-6 shadow-lg bg-gradient-to-br from-white via-white to-indigo-50/30">
-            <h3 className="mb-5 text-slate-900">
+            <h3 className="font-semibold mb-2 text-slate-900">
               프로젝트 정보
             </h3>
             <div className="space-y-4">
@@ -326,11 +326,11 @@ export function ProjectDetail({
 
           {!isLeader && ProjectDetails.status === "Recruiting" && (
             <Card className="p-6 shadow-lg bg-gradient-to-br from-white to-indigo-50/20">
-              <div className="flex items-center gap-2 mb-4">
+              <div className="flex items-center gap-2 mb-2">
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                   <Send className="h-4 w-4 text-white" />
                 </div>
-                <h3 className="text-slate-900">
+                <h3 className="font-semibold text-slate-900">
                   프로젝트 지원
                 </h3>
               </div>

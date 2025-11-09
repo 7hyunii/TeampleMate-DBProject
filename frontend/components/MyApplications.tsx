@@ -71,7 +71,7 @@ export function MyApplications({ currentUserId }: { currentUserId: string }) {
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <h3 className="mb-2 text-slate-900 leading-tight">{app.project_topic}</h3>
+              <h3 className="font-semibold mb-2 text-slate-900 leading-tight">{app.project_topic}</h3>
               <div className="flex items-center gap-2 text-sm">
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                   <span className="text-white text-xs font-bold">{app.project_leader_name?.[0]}</span>

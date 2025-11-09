@@ -68,7 +68,7 @@ export function Navigation({ currentView, onViewChange }: NavigationProps) {
               className="gap-2"
             >
               <User className="h-4 w-4" />
-              <span className="hidden sm:inline">{userName}</span>
+              <span className="font-semibold hidden sm:inline">{userName}</span>
             </Button>
           </div>
         </div>
