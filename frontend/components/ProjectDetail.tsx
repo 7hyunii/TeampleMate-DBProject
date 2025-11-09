@@ -114,6 +114,7 @@ export function ProjectDetail({
 
   const handleApply = async () => {
     if (!motivation.trim()) return;
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
     try {
       const res = await fetch("http://localhost:8000/apply", {
         method: "POST",
@@ -121,6 +122,7 @@ export function ProjectDetail({
         body: JSON.stringify({
           project_id: project?.project_id,
           applicant_id: currentUserId,
+          applicant_date: today,
           motivation,
         }),
       });
@@ -187,7 +189,7 @@ export function ProjectDetail({
               </Badge>
             </div>
 
-            <div className="flex flex-wrap gap-2 mb-6">
+            <div className="flex flex-wrap gap-2 mb-1">
               {ProjectDetails.skills.map((skill: string, idx: number) => {
                 const display = SKILL_DISPLAY_MAP[skill.toLowerCase()] || (skill.charAt(0).toUpperCase() + skill.slice(1));
                 return (
@@ -202,7 +204,7 @@ export function ProjectDetail({
               })}
             </div>
 
-            <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-6" />
+            <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-1" />
 
             <div className="prose max-w-none">
               <p className="text-slate-700 whitespace-pre-line leading-relaxed">

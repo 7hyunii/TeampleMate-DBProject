@@ -38,6 +38,7 @@ class ProjectCreateRequest(BaseModel):
 class ApplicationRequest(BaseModel):
     project_id: int
     applicant_id: str
+    applicant_date: str
     motivation: str
 
 
@@ -173,7 +174,7 @@ def apply_project(req: ApplicationRequest):
     프로젝트 지원
     """
     try:
-        apply_to_project(req.project_id, req.applicant_id, req.motivation)
+        apply_to_project(req.project_id, req.applicant_id, req.applicant_date, req.motivation)
         return {"msg": "지원이 완료되었습니다."}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

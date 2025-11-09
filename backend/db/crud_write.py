@@ -84,15 +84,15 @@ def create_project_with_skills(leader_id, topic, description1, description2, cap
         put_conn(conn)
 
 # 프로젝트 지원
-def apply_to_project(project_id: int, applicant_id: str, motivation: str):
+def apply_to_project(project_id: int, applicant_id: str, applicant_date: str, motivation: str):
     conn = get_conn()
     try:
         with conn:
             with conn.cursor() as cur:
                 project = get_project_details(project_id, applicant_id)
                 cur.execute(
-                    "INSERT INTO Applications (project_id, applicant_id, motivation) VALUES (%s, %s, %s)",
-                    (project_id, applicant_id, motivation)
+                    "INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation) VALUES (%s, %s, %s, %s)",
+                    (project_id, applicant_id, applicant_date, motivation)
                 )
     finally:
         put_conn(conn)
