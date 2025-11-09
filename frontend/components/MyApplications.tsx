@@ -4,44 +4,41 @@ import { Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { useState, useEffect } from 'react';
 
-export function MyApplications() {
-  // === 모킹 데이터 시작 ===
-  const applications = [
-    {
-      id: '1',
-      projectTitle: '부산 대학가 맛집 추천 플랫폼',
-      projectLeader: '박지영',
-      appliedDate: '2025-11-01',
-      status: 'Pending' as const,
-      motivation: '지역 기반 서비스에 관심이 많아 지원했습니다. React와 지도 API 경험을 살려 기여하고 싶습니다.'
-    },
-    {
-      id: '2',
-      projectTitle: 'IoT 스마트 캠퍼스 프로젝트',
-      projectLeader: '최서연',
-      appliedDate: '2025-10-28',
-      status: 'Accepted' as const,
-      motivation: 'IoT에 관심이 있어 지원했습니다. Python과 하드웨어 경험을 바탕으로 참여하고 싶습니다.'
-    },
-    {
-      id: '3',
-      projectTitle: '블록체인 기반 중고거래 시스템',
-      projectLeader: '이준호',
-      appliedDate: '2025-10-25',
-      status: 'Rejected' as const,
-      motivation: '블록체인 기술을 배우고 싶어 지원했습니다.'
-    },
-    {
-      id: '4',
-      projectTitle: '데이터 시각화 대시보드',
-      projectLeader: '정현우',
-      appliedDate: '2025-10-20',
-      status: 'Accepted' as const,
-      motivation: 'D3.js를 활용한 데이터 시각화에 관심이 있어 지원했습니다.'
+interface Application {
+    application_id: string;
+    project_id: string;
+    project_topic: string;
+    project_leader_id: string;
+    project_leader_name: string;
+    applicant_date: string;
+    motivation: string;
+    status: 'Pending' | 'Accepted' | 'Rejected';
+  }
+
+export function MyApplications({ currentUserId }: { currentUserId: string }) {
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchMyApplications() {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch(`http://localhost:8000/myapplications/${currentUserId}`);
+        if (!res.ok) throw new Error("데이터를 불러올 수 없습니다.");
+        const data = await res.json();
+        setApplications(Array.isArray(data) ? data : Array.isArray(data.applications) ? data.applications : []);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "알 수 없는 오류");
+      } finally {
+        setLoading(false);
+      }
     }
-  ];
-  // === 모킹 데이터 끝 ===
+    fetchMyApplications();
+  }, [currentUserId]);
 
   const pendingApps = applications.filter(a => a.status === 'Pending');
   const acceptedApps = applications.filter(a => a.status === 'Accepted');
@@ -68,21 +65,18 @@ export function MyApplications() {
   const ApplicationCard = ({ app }: { app: typeof applications[0] }) => {
     const config = statusConfig[app.status];
     const Icon = config.icon;
-
     return (
       <Card className="p-6 shadow-lg hover:shadow-xl transition-all hover:border-indigo-200 bg-gradient-to-br from-white to-slate-50/30 relative overflow-hidden">
-        {/* Decorative element */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-100/30 to-purple-100/30 rounded-full blur-3xl -z-0" />
-        
         <div className="relative z-10">
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
-              <h3 className="mb-2 text-slate-900 leading-tight">{app.projectTitle}</h3>
+              <h3 className="mb-2 text-slate-900 leading-tight">{app.project_topic}</h3>
               <div className="flex items-center gap-2 text-sm">
                 <div className="w-6 h-6 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">{app.projectLeader[0]}</span>
+                  <span className="text-white text-xs font-bold">{app.project_leader_name?.[0]}</span>
                 </div>
-                <span className="text-slate-600">리더: <span className="font-medium">{app.projectLeader}</span></span>
+                <span className="text-slate-600">리더: <span className="font-medium">{app.project_leader_name}</span></span>
               </div>
             </div>
             <Badge className={`${config.className} shadow-sm`}>
@@ -90,18 +84,15 @@ export function MyApplications() {
               {config.text}
             </Badge>
           </div>
-
           <div className="bg-gradient-to-br from-indigo-50/50 to-purple-50/50 p-4 rounded-xl mb-4 border border-indigo-100/50">
             <p className="text-xs text-indigo-900 mb-1.5 font-semibold">지원 동기</p>
             <p className="text-sm text-slate-700 leading-relaxed">{app.motivation}</p>
           </div>
-
           <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-3" />
-
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2 text-slate-600 bg-slate-100/70 px-2.5 py-1.5 rounded-lg">
               <Calendar className="h-3.5 w-3.5" />
-              <span>{app.appliedDate}</span>
+              <span>{app.applicant_date}</span>
             </div>
             {app.status === 'Pending' && (
               <span className="text-amber-700 font-medium text-xs">리더의 승인을 기다리고 있습니다</span>
@@ -115,13 +106,28 @@ export function MyApplications() {
     );
   };
 
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto py-20 text-center text-gray-500">
+        <Clock className="h-12 w-12 mx-auto mb-3 text-gray-400 animate-spin" />
+        <p>지원현황을 불러오는 중...</p>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto py-20 text-center text-red-500">
+        <XCircle className="h-12 w-12 mx-auto mb-3 text-red-400" />
+        <p>{error}</p>
+      </div>
+    );
+  }
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>
         <h2>내 지원현황</h2>
         <p className="text-gray-600">지원한 프로젝트의 현황을 확인하세요</p>
       </div>
-
       <Tabs defaultValue="all">
         <TabsList>
           <TabsTrigger value="all">
@@ -137,17 +143,22 @@ export function MyApplications() {
             거절됨 ({rejectedApps.length})
           </TabsTrigger>
         </TabsList>
-
         <TabsContent value="all" className="space-y-4">
-          {applications.map(app => (
-            <ApplicationCard key={app.id} app={app} />
-          ))}
+          {applications.length > 0 ? (
+            applications.map(app => (
+              <ApplicationCard key={app.application_id} app={app} />
+            ))
+          ) : (
+            <div className="text-center py-12 text-gray-500">
+              <Clock className="h-12 w-12 mx-auto mb-3 text-gray-400" />
+              <p>지원한 프로젝트가 없습니다.</p>
+            </div>
+          )}
         </TabsContent>
-
         <TabsContent value="pending" className="space-y-4">
           {pendingApps.length > 0 ? (
             pendingApps.map(app => (
-              <ApplicationCard key={app.id} app={app} />
+              <ApplicationCard key={app.application_id} app={app} />
             ))
           ) : (
             <div className="text-center py-12 text-gray-500">
@@ -156,11 +167,10 @@ export function MyApplications() {
             </div>
           )}
         </TabsContent>
-
         <TabsContent value="accepted" className="space-y-4">
           {acceptedApps.length > 0 ? (
             acceptedApps.map(app => (
-              <ApplicationCard key={app.id} app={app} />
+              <ApplicationCard key={app.application_id} app={app} />
             ))
           ) : (
             <div className="text-center py-12 text-gray-500">
@@ -169,11 +179,10 @@ export function MyApplications() {
             </div>
           )}
         </TabsContent>
-
         <TabsContent value="rejected" className="space-y-4">
           {rejectedApps.length > 0 ? (
             rejectedApps.map(app => (
-              <ApplicationCard key={app.id} app={app} />
+              <ApplicationCard key={app.application_id} app={app} />
             ))
           ) : (
             <div className="text-center py-12 text-gray-500">

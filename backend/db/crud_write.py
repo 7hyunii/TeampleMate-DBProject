@@ -89,7 +89,6 @@ def apply_to_project(project_id: int, applicant_id: str, applicant_date: str, mo
     try:
         with conn:
             with conn.cursor() as cur:
-                project = get_project_details(project_id, applicant_id)
                 cur.execute(
                     "INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation) VALUES (%s, %s, %s, %s)",
                     (project_id, applicant_id, applicant_date, motivation)

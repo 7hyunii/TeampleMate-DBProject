@@ -3,7 +3,7 @@ from tkinter.tix import STATUS
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from db.utils import hash_password, verify_password
-from db.crud_read import student_exists, login_student, get_student_profile_with_skills, get_all_projects, get_project_details
+from db.crud_read import student_exists, login_student, get_student_profile_with_skills, get_all_projects, get_project_details, get_applications_by_applicant
 from db.crud_write import create_student, update_student_profile, create_project_with_skills, apply_to_project
 router = APIRouter()
 
@@ -78,7 +78,8 @@ def root():
                 "response": "{ projects: [...] }"
             },
             {"path": "/projects/{project_id}", "method": "GET", "desc": "프로젝트 상세 정보 조회"},
-            {"path": "/apply", "method": "POST", "desc": "프로젝트 지원"}
+            {"path": "/apply", "method": "POST", "desc": "프로젝트 지원"},
+            {"path": "/myapplications/{current_user_id}", "method": "GET", "desc": "내 지원 현황 조회"}
         ]
     }
 
@@ -180,5 +181,16 @@ def apply_project(req: ApplicationRequest):
         raise HTTPException(status_code=400, detail=str(e))
     except PermissionError as e:
         raise HTTPException(status_code=403, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="서버 오류: " + str(e))
+
+@router.get("/myapplications/{current_user_id}")
+def get_my_applications(current_user_id: str):
+    """
+    내 지원 현황 조회
+    """
+    try:
+        applications = get_applications_by_applicant(current_user_id)
+        return {"applications": applications}
     except Exception as e:
         raise HTTPException(status_code=500, detail="서버 오류: " + str(e))

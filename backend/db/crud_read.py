@@ -195,3 +195,34 @@ def get_project_details(project_id: int, applicant_id: str = None):
                 return project
     finally:
         put_conn(conn)
+
+def get_applications_by_applicant(current_user_id: str):
+    conn = get_conn()
+    try:
+        with conn:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT 
+                        a.application_id, a.project_id, p.topic, s.uid, s.name, a.applicant_date, a.motivation, a.status
+                    FROM Applications a 
+                        JOIN Projects p ON a.project_id = p.project_id
+                        JOIN Students s ON p.leader_id = s.uid
+                    WHERE a.applicant_id = %s
+                    ORDER BY a.applicant_date DESC
+                """, (current_user_id,))
+                applications = []
+                for row in cur.fetchall():
+                    application = {
+                        "application_id": row[0],
+                        "project_id": row[1],
+                        "project_topic": row[2],
+                        "project_leader_id": row[3],
+                        "project_leader_name": row[4],
+                        "applicant_date": row[5],
+                        "motivation": row[6],
+                        "status": row[7]
+                    }
+                    applications.append(application)
+                return applications
+    finally:
+        put_conn(conn)

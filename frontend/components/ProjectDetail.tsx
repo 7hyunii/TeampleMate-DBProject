@@ -59,17 +59,21 @@ export function ProjectDetail({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    setLoading(true);
-    setError("");
-    // applicant_id를 쿼리로 넘겨서 지원 가능 여부 포함된 project 정보 받기
-    fetch(`http://localhost:8000/projects/${projectId}?applicant_id=${currentUserId}`)
-      .then((res) => {
+    async function fetchProject() {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch(`http://localhost:8000/projects/${projectId}?applicant_id=${currentUserId}`);
         if (!res.ok) throw new Error("프로젝트 정보를 불러올 수 없습니다.");
-        return res.json();
-      })
-      .then((data) => setProject(data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+        const data = await res.json();
+        setProject(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "알 수 없는 오류");
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProject();
   }, [projectId, currentUserId]);
 
   if (!project) {

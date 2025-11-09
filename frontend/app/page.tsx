@@ -114,7 +114,9 @@ export default function Home() {
         )}
         
         {currentView === 'applications' && (
-          <MyApplications />
+          <MyApplications 
+            currentUserId={userId}
+          />
         )}
         
         {currentView === 'my-projects' && (
