@@ -69,20 +69,18 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
       <Navigation
         currentView={currentView}
         onViewChange={handleViewChange}
       />
-      
-      <main className="container mx-auto px-4 py-4 md:py-8 pb-24 md:pb-8">
+      <main className="container mx-auto px-4 py-4 md:py-8 pb-24 md:pb-8 flex-1">
         {currentView === 'projects' && (
           <ProjectList 
             onViewDetail={handleViewDetail}
             onCreateProject={handleCreateProject}
           />
         )}
-        
         {currentView === 'project-detail' && selectedProjectId && (
           <ProjectDetail
             projectId={selectedProjectId}
@@ -91,34 +89,29 @@ export default function Home() {
             onManageApplicants={handleManageApplicants}
           />
         )}
-        
         {currentView === 'create-project' && (
           <CreateProject
             onBack={handleBack}
             onSubmit={handleProjectCreated}
           />
         )}
-        
         {currentView === 'applicant-management' && selectedProjectId && (
           <ApplicantManagement
             projectId={selectedProjectId}
             onBack={() => setCurrentView('my-projects')}
           />
         )}
-        
         {currentView === 'profile' && (
           <ProfileManagement 
             currentUser={userName}
             onLogout={() => setCurrentView('projects')}
           />
         )}
-        
         {currentView === 'applications' && (
           <MyApplications 
             currentUserId={userId}
           />
         )}
-        
         {currentView === 'my-projects' && (
           <MyProjects
             onCreateProject={handleCreateProject}
@@ -126,7 +119,6 @@ export default function Home() {
             onReviewTeam={handleReviewTeam}
           />
         )}
-        
         {currentView === 'peer-review' && selectedProjectId && (
           <PeerReview
             projectId={selectedProjectId}

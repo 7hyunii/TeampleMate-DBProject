@@ -1,6 +1,7 @@
 'use client';
 
 import { Clock, CheckCircle, XCircle, Calendar } from 'lucide-react';
+import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
@@ -106,22 +107,56 @@ export function MyApplications({ currentUserId }: { currentUserId: string }) {
     );
   };
 
+  function SkeletonCard() {
+    return (
+      <div className="animate-pulse bg-white rounded-2xl border border-slate-200 shadow-md p-6 flex flex-col gap-3 min-h-[180px]">
+        <div className="h-6 w-2/3 bg-slate-200 rounded mb-2" />
+        <div className="h-4 w-1/2 bg-slate-100 rounded mb-1" />
+        <div className="h-4 w-1/3 bg-slate-100 rounded mb-1" />
+        <div className="flex gap-2 mt-2">
+          <div className="h-6 w-16 bg-slate-100 rounded" />
+          <div className="h-6 w-16 bg-slate-100 rounded" />
+        </div>
+        <div className="h-8 w-24 bg-slate-200 rounded mt-4" />
+      </div>
+    );
+  }
+
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto py-20 text-center text-gray-500">
-        <Clock className="h-12 w-12 mx-auto mb-3 text-gray-400 animate-spin" />
-        <p>지원현황을 불러오는 중...</p>
+      <div className="max-w-4xl mx-auto space-y-6 min-h-[800px]">
+        <div>
+          <h2>내 지원현황</h2>
+          <p className="text-gray-600">지원한 프로젝트의 현황을 확인하세요</p>
+        </div>
+        <div className="space-y-4">
+          {Array.from({ length: 4 }).map((_, idx) => <SkeletonCard key={idx} />)}
+        </div>
       </div>
     );
   }
+  
   if (error) {
-    return (
-      <div className="max-w-4xl mx-auto py-20 text-center text-red-500">
-        <XCircle className="h-12 w-12 mx-auto mb-3 text-red-400" />
-        <p>{error}</p>
-      </div>
-    );
-  }
+      return (
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div>
+            <h2>내 지원현황</h2>
+            <p className="text-gray-600">지원한 프로젝트의 현황을 확인하세요</p>
+          </div>
+          <div className="flex flex-col items-center justify-center text-red-600 mt-20">
+            <div className="mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+            <h3 className="text-lg font-medium mb-2">데이터를 불러올 수 없습니다</h3>
+            <p className="mb-4">잠시 후 다시 시도하거나 새로고침 해주세요.</p>
+            <Button onClick={() => window.location.reload()} variant="outline">
+              새로고침
+            </Button>
+          </div>
+        </div>
+      );
+    }
+  
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>

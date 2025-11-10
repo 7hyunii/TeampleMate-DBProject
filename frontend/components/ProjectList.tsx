@@ -20,6 +20,21 @@ function displaySkill(skill: string): string {
   return SKILL_DISPLAY_MAP[key] || skill.charAt(0).toUpperCase() + skill.slice(1);
 }
 
+function ProjectSkeletonCard() {
+  return (
+    <div className="animate-pulse bg-white rounded-2xl border border-slate-200 shadow-md p-6 flex flex-col gap-3 min-h-[180px]">
+      <div className="h-6 w-2/3 bg-slate-200 rounded mb-2" />
+      <div className="h-4 w-1/2 bg-slate-100 rounded mb-1" />
+      <div className="h-4 w-1/3 bg-slate-100 rounded mb-1" />
+      <div className="flex gap-2 mt-2">
+        <div className="h-6 w-16 bg-slate-100 rounded" />
+        <div className="h-6 w-16 bg-slate-100 rounded" />
+      </div>
+      <div className="h-8 w-24 bg-slate-200 rounded mt-4" />
+    </div>
+  );
+}
+
 
 // 실제 프로젝트로 등록된 스킬들만 추출
 function getAllSkills(projects: any[]): string[] {
@@ -40,9 +55,11 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
   const [sortBy, setSortBy] = useState('deadline');
   const { isLoggedIn, openAuthModal } = useAuth();
   const [projects, setProjects] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchInput, setSearchInput] = useState('');
 
   useEffect(() => {
+    setIsLoading(true);
     const params = new URLSearchParams();
     params.append('orderBy', sortBy);
     params.append('groupBy', statusFilter);
@@ -65,7 +82,8 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
           status: p.status,
         })));
       })
-      .catch(() => setProjects([]));
+      .catch(() => setProjects([]))
+      .finally(() => setIsLoading(false));
   }, [sortBy, statusFilter, searchInput]);
 
   const toggleSkill = (skill: string) => {
@@ -127,7 +145,7 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
             </div>
             <div className="flex gap-2 sm:gap-3">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="flex-1 sm:w-32 md:w-44 h-11 bg-white border-slate-200 shadow-sm">
+                <SelectTrigger className="flex-1 sm:w-32 md:w-44 h-11 bg-white border-slate-200 shadow-sm font-medium">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -138,7 +156,7 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
                 </SelectContent>
               </Select>
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="flex-1 sm:w-32 md:w-44 h-11 bg-white border-slate-200 shadow-sm">
+                <SelectTrigger className="flex-1 sm:w-32 md:w-44 h-11 bg-white border-slate-200 shadow-sm font-medium">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -197,22 +215,24 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-5">
-        {filteredProjects.map(project => (
-          <ProjectCard
-            key={project.id}
-            project={project}
-            onViewDetail={onViewDetail}
-          />
-        ))}
+        {isLoading
+          ? Array.from({ length: 6 }).map((_, idx) => <ProjectSkeletonCard key={idx} />)
+          : filteredProjects.map(project => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                onViewDetail={onViewDetail}
+              />
+            ))}
       </div>
 
       {/* Empty State */}
-      {filteredProjects.length === 0 && (
-        <div className="text-center py-16 px-4 min-h-[500px] flex flex-col justify-center max-w-md mx-auto">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full mb-4">
+      {!isLoading && filteredProjects.length === 0 && (
+        <div className="text-center py-16 px-4 flex flex-col justify-center max-w-md mx-auto">
+          {/* <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-slate-100 to-slate-200 rounded-full mb-4">
             <Search className="h-10 w-10 text-slate-400" />
-          </div>
-          <h3 className="text-slate-900 mb-2">프로젝트를 찾을 수 없습니다</h3>
+          </div> */}
+          <h3 className="text-slate-900 font-medium mb-2">프로젝트를 찾을 수 없습니다</h3>
           <p className="text-slate-500 text-sm mb-6">검색 조건을 변경하거나 필터를 초기화해보세요</p>
           {(searchInput || statusFilter !== 'all' || selectedSkills.length > 0) && (
             <Button 
