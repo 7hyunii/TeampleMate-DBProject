@@ -53,7 +53,7 @@ def get_applications_by_applicant(db: Session, current_user_id: str) -> list[dic
 
 def get_applications_by_project(db: Session, project_id: int, current_user_id: str) -> list[dict] | None:
     """
-    리더 -> 프로젝트에 대한 지원자 목록 조회
+    프로젝트에 대한 지원자 목록 조회 (리더 전용)
     - 호출자의 uid가 프로젝트의 leader_id와 다르면 PermissionError 발생
     """
     # 1) 프로젝트 존재 및 리더 확인
@@ -78,7 +78,6 @@ def get_applications_by_project(db: Session, project_id: int, current_user_id: s
             result = conn.execute(text(
                 "SELECT * FROM ProjectApplicantsView WHERE project_id = :project_id ORDER BY applicant_date DESC"
             ), {"project_id": project_id})
-            # role 원복
             conn.execute(text("RESET ROLE"))
             conn.execute(text("COMMIT"))
         except Exception as e:
@@ -95,5 +94,55 @@ def get_applications_by_project(db: Session, project_id: int, current_user_id: s
     applications = [dict(r) for r in rows]
     return applications
 
-# 지원자 관리 버튼을 누르면 set role을 통해 leader 권한을 획득하고, 지원자들의 상태 변경 가능.
-# 해당 페이지에서 벗어나면 끝나면 다시 other 권한으로 변경
+def update_application_status(db: Session, project_id: int, applicant_id: str, new_status: str, leader_id: str) -> None:
+    """
+    지원 상태 업데이트 (리더 전용)
+    """
+    # 1) 지원 정보 조회 (프로젝트 리더인지도 함께 확인)
+    result = db.execute(text(
+        """
+        SELECT p.leader_id
+        FROM Applications a JOIN Projects p ON a.project_id = p.project_id
+        WHERE a.applicant_id = :applicant_id AND a.project_id = :project_id
+        """
+    ), {"applicant_id": applicant_id, "project_id": project_id})
+    # bind project_id as well
+    row = result.fetchone()
+    if not row:
+        raise ValueError("해당 지원자를 찾을 수 없습니다.")
+    project_leader_id = row[0]
+
+    # 2) 권한 검증: 호출자가 리더가 아니면 권한 오류 발생
+    if leader_id != project_leader_id:
+        raise PermissionError("권한이 없습니다. 프로젝트 리더만 지원 상태를 변경할 수 있습니다.")
+
+    # 3) 지원 상태 업데이트
+    # 리더 권한으로 실제 쿼리를 실행: 동일한 물리적 연결에서 SET ROLE leader 후 UPDATE
+    engine = db.get_bind()
+    conn = engine.connect()
+    try:
+        try:
+            conn.execute(text("BEGIN"))
+            conn.execute(text("SET ROLE leader"))
+            update_result = conn.execute(text(
+                """
+                UPDATE Applications
+                SET status = :new_status
+                WHERE applicant_id = :applicant_id AND project_id = :project_id
+                """
+            ), {
+                "new_status": new_status,
+                "applicant_id": applicant_id,
+                "project_id": project_id,
+            })
+            conn.execute(text("RESET ROLE"))
+            conn.execute(text("COMMIT"))
+        except Exception as e:
+            # SET ROLE 실패나 UPDATE 권한 문제 등은 권한 문제로 간주
+            conn.execute(text("ROLLBACK"))
+            raise PermissionError("리더 권한 획득 또는 업데이트 실패: " + str(e))
+
+        if update_result.rowcount == 0:
+            raise ValueError("지원 상태 업데이트에 실패했습니다.")
+    finally:
+        conn.close()

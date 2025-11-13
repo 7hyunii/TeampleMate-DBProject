@@ -37,13 +37,12 @@ def get_projects(req: ProjectListRequest = Depends(), db: Session = Depends(get_
     """
     try:
         projects = get_all_projects(db, req.orderBy.value, req.groupBy.value, req.search)
-        # 명시적으로 Pydantic 모델로 변환하여 반환
         items = [ProjectListItem(**p) for p in projects]
         return ProjectListResponse(projects=items)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-@router.get("/details/{project_id}", response_model=ProjectDetailsResponse, status_code=status.HTTP_200_OK)
+@router.get("/{project_id}", response_model=ProjectDetailsResponse, status_code=status.HTTP_200_OK)
 def get_details(project_id: int, applicant_id: str = None, db: Session = Depends(get_db)) -> ProjectDetailsResponse:
     """
     프로젝트 상세 정보 조회

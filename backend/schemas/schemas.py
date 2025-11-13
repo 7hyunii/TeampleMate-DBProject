@@ -90,7 +90,6 @@ class ProjectDetailsResponse(BaseModel):
     can_apply: bool
 
 class ApplicationRequest(BaseModel):
-    project_id: int
     applicant_id: str
     applicant_date: str
     motivation: str
@@ -125,3 +124,12 @@ class ApplicationsManagementItem(BaseModel):
 
 class ApplicationsManagementResponse(BaseModel):
     applications: list[ApplicationsManagementItem]
+
+class newStatus(str, Enum):
+    Pending = "Pending"
+    Accepted = "Accepted"
+    Rejected = "Rejected"
+
+class ApplicationStatusUpdateRequest(BaseModel):
+    new_status: newStatus = newStatus.Pending
+    leader_id: str

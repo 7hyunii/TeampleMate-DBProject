@@ -12,6 +12,7 @@ import { Separator } from './ui/separator';
 
 interface ApplicantManagementProps {
   projectId: string;
+  applicantId: string;
   currentUserId: string;
   onBack: () => void;
 }
@@ -22,6 +23,7 @@ type PastReview = { score: number; comment: string; projectName: string };
 
 type Applicant = {
   id: string;
+  applicantUid?: string;
   name: string;
   skills: string[];
   profileText?: string;
@@ -56,6 +58,7 @@ type ApiApplicationsResponse = { applications: ApiApplicant[] };
 function mapApiApplicantToApplicant(api: ApiApplicant): Applicant {
   return {
     id: String(api.application_id),
+    applicantUid: api.applicant_id,
     name: api.applicant_name ?? api.applicant_id,
     skills: Array.isArray(api.applicant_skills) ? api.applicant_skills : [],
     profileText: api.applicant_profile_text ?? '',
@@ -76,18 +79,19 @@ function displaySkill(skill: string): string {
   return SKILL_DISPLAY_MAP[key] || skill.charAt(0).toUpperCase() + skill.slice(1);
 }
 
-export function ApplicantManagement({ projectId, currentUserId, onBack }: ApplicantManagementProps) {
+export function ApplicantManagement({ projectId, applicantId, currentUserId, onBack }: ApplicantManagementProps) {
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [selectedApplicant, setSelectedApplicant] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [updatingIds, setUpdatingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let mounted = true;
     setLoading(true);
     setError(null);
 
-    fetch(`http://127.0.0.1:8000/applications/viewapplications/${projectId}?current_user_id=${currentUserId}`)
+    fetch(`http://127.0.0.1:8000/projects/${projectId}/applications?current_user_id=${currentUserId}`)
       .then((res) => {
         if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
         return res.json();
@@ -106,6 +110,11 @@ export function ApplicantManagement({ projectId, currentUserId, onBack }: Applic
 
         const mapped = apiList.map(mapApiApplicantToApplicant);
         setApplicants(mapped);
+        // pre-select applicant by applicantId (student uid) if provided
+        if (applicantId) {
+          const found = mapped.find(m => m.applicantUid === applicantId);
+          if (found) setSelectedApplicant(found.id);
+        }
       })
       .catch((err: any) => {
         if (mounted) setError(err?.message ?? 'Unknown error');
@@ -117,19 +126,56 @@ export function ApplicantManagement({ projectId, currentUserId, onBack }: Applic
     return () => {
       mounted = false;
     };
-  }, [projectId, currentUserId]);
+  }, [projectId, currentUserId, applicantId]);
 
-  const handleAccept = (id: string) => {
-    setApplicants((prev: Applicant[]) => prev.map((app: Applicant) =>
-      app.id === id ? { ...app, status: 'Accepted' } : app
-    ));
+  const updateStatus = async (id: string, newStatus: ApplicantStatus) => {
+    // find applicant by application id
+    const idx = applicants.findIndex(a => a.id === id);
+    if (idx === -1) return;
+    const applicant = applicants[idx];
+    if (!applicant.applicantUid) {
+      alert('지원자 UID가 없습니다.');
+      return;
+    }
+
+    const originalStatus = applicant.status;
+
+    // optimistic update
+    setApplicants(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a));
+    setUpdatingIds(prev => {
+      const s = new Set(prev);
+      s.add(id);
+      return s;
+    });
+
+    try {
+      const res = await fetch(`http://127.0.0.1:8000/projects/${projectId}/applications/${applicant.applicantUid}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_status: newStatus, leader_id: currentUserId }),
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`업데이트 실패: ${res.status} ${text}`);
+      }
+      // success: nothing more to do (UI already optimistic-updated)
+    } catch (err: any) {
+      // rollback
+      setApplicants(prev => prev.map(a => a.id === id ? { ...a, status: originalStatus } : a));
+      const msg = err?.message ?? '알 수 없는 오류';
+      setError(msg);
+      alert(msg);
+    } finally {
+      setUpdatingIds(prev => {
+        const s = new Set(prev);
+        s.delete(id);
+        return s;
+      });
+    }
   };
 
-  const handleReject = (id: string) => {
-    setApplicants((prev: Applicant[]) => prev.map((app: Applicant) =>
-      app.id === id ? { ...app, status: 'Rejected' } : app
-    ));
-  };
+  const handleAccept = (id: string) => updateStatus(id, 'Accepted');
+  const handleReject = (id: string) => updateStatus(id, 'Rejected');
 
   const safeApplicants = Array.isArray(applicants) ? applicants : [];
   const pendingApplicants = safeApplicants.filter(a => a.status === 'Pending');
@@ -180,6 +226,7 @@ export function ApplicantManagement({ projectId, currentUserId, onBack }: Applic
                   variant="outline"
                   onClick={() => handleReject(applicant.id)}
                   className="gap-2"
+                  disabled={updatingIds.has(applicant.id)}
                 >
                   <X className="h-4 w-4" />
                   거절
@@ -188,6 +235,7 @@ export function ApplicantManagement({ projectId, currentUserId, onBack }: Applic
                   size="sm"
                   onClick={() => handleAccept(applicant.id)}
                   className="gap-2"
+                  disabled={updatingIds.has(applicant.id)}
                 >
                   <Check className="h-4 w-4" />
                   승인

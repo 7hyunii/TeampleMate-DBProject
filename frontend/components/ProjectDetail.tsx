@@ -95,7 +95,7 @@ export function ProjectDetail({
       setLoading(true);
       setError("");
       try {
-        const res = await fetch(`http://localhost:8000/projects/details/${projectId}?applicant_id=${currentUserId}`);
+        const res = await fetch(`http://localhost:8000/projects/${projectId}?applicant_id=${currentUserId}`);
         if (!res.ok) throw new Error("프로젝트 정보를 불러올 수 없습니다.");
         const data = await res.json();
         setProject(data);
@@ -156,7 +156,7 @@ export function ProjectDetail({
     if (!motivation.trim()) return;
     const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
     try {
-      const res = await fetch("http://localhost:8000/applications/apply", {
+      const res = await fetch(`http://localhost:8000/projects/${projectId}/apply`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

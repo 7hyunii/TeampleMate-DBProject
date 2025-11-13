@@ -57,7 +57,7 @@ export function CreateProject({ onBack, onSubmit }: CreateProjectProps) {
 
   const handleSubmit = async () => {
     try {
-      const res = await fetch("http://localhost:8000/project", {
+      const res = await fetch("http://localhost:8000/project/new", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
