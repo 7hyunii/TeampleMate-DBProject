@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowLeft, Check, X, Star, ExternalLink, MessageSquare } from 'lucide-react';
+import { SKILL_DISPLAY_MAP } from '../constants/skills';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
@@ -11,85 +12,143 @@ import { Separator } from './ui/separator';
 
 interface ApplicantManagementProps {
   projectId: string;
+  currentUserId: string;
   onBack: () => void;
 }
 
-// === 모킹 데이터 시작 ===
-const mockApplicants = [
-  {
-    id: 'app1',
-    name: '홍길동',
-    skills: ['React', 'TypeScript', 'Node.js'],
-    profileText: '풀스택 개발에 관심이 많은 3학년 학생입니다. 다양한 프로젝트 경험을 쌓고 싶습니다.',
-    website: 'https://github.com/honggildong',
-    motivation: '이 프로젝트의 AI 기술 활용 부분에 큰 관심이 있습니다. React Native 경험을 살려 프론트엔드 개발에 기여하고 싶습니다.',
-    appliedDate: '2025-11-01',
-    status: 'Pending' as const,
-    avgRating: 4.5,
-    reviewCount: 3,
-    pastReviews: [
-      { score: 5, comment: '책임감이 강하고 코드 퀄리티가 우수합니다.', projectName: '웹 포트폴리오 제작' },
-      { score: 4, comment: '커뮤니케이션이 원활하고 적극적입니다.', projectName: '쇼핑몰 프로젝트' },
-      { score: 5, comment: '항상 기한을 잘 지키고 팀워크가 좋습니다.', projectName: '날씨 앱 개발' }
-    ]
-  },
-  {
-    id: 'app2',
-    name: '김철수',
-    skills: ['Python', 'Django', 'MySQL'],
-    profileText: '백엔드 개발자를 목표로 하는 학생입니다. 데이터베이스 설계와 API 개발에 자신 있습니다.',
-    website: 'https://github.com/kimcs',
-    motivation: 'Node.js 기반 백엔드 개발 경험을 쌓고 싶어 지원했습니다. Python 경험을 바탕으로 빠르게 학습할 수 있습니다.',
-    appliedDate: '2025-11-02',
-    status: 'Pending' as const,
-    avgRating: 4.8,
-    reviewCount: 5,
-    pastReviews: [
-      { score: 5, comment: '기술적으로 뛰어나고 문제 해결 능력이 탁월합니다.', projectName: 'RESTful API 개발' },
-      { score: 5, comment: '성실하고 책임감 있게 프로젝트를 완수했습니다.', projectName: '블로그 플랫폼' },
-      { score: 4, comment: '적극적이고 배우려는 자세가 좋습니다.', projectName: '채팅 애플리케이션' }
-    ]
-  },
-  {
-    id: 'app3',
-    name: '박영희',
-    skills: ['UI/UX', 'Figma', 'React'],
-    profileText: 'UI/UX 디자인과 프론트엔드 개발을 함께 하는 학생입니다.',
-    website: 'https://behance.net/parkyh',
-    motivation: '사용자 경험을 중시하는 학습 앱을 만들고 싶어 지원했습니다. 디자인부터 구현까지 기여하겠습니다.',
-    appliedDate: '2025-11-02',
-    status: 'Pending' as const,
-    avgRating: 4.3,
-    reviewCount: 2,
-    pastReviews: [
-      { score: 4, comment: '디자인 감각이 뛰어나고 세심합니다.', projectName: '여행 앱 UI' },
-      { score: 4, comment: '사용자 관점에서 생각하는 능력이 좋습니다.', projectName: '대시보드 디자인' }
-    ]
-  }
-];
-// === 모킹 데이터 끝 ===
+type ApplicantStatus = 'Pending' | 'Accepted' | 'Rejected';
 
-export function ApplicantManagement({ projectId, onBack }: ApplicantManagementProps) {
-  const [applicants, setApplicants] = useState(mockApplicants);
+type PastReview = { score: number; comment: string; projectName: string };
+
+type Applicant = {
+  id: string;
+  name: string;
+  skills: string[];
+  profileText?: string;
+  website?: string;
+  motivation?: string;
+  appliedDate?: string;
+  status: ApplicantStatus;
+  avgRating?: number;
+  reviewCount?: number;
+  pastReviews?: PastReview[];
+};
+
+// API shapes (match backend `ApplicationsManagementItem`)
+type ApiApplicant = {
+  leader_id: string;
+  project_id: number;
+  application_id: number;
+  applicant_id: string;
+  applicant_date?: string;
+  applicant_name?: string;
+  applicant_email?: string;
+  applicant_profile_text?: string;
+  applicant_website_link?: string;
+  applicant_motivation?: string;
+  status: 'Pending' | 'Accepted' | 'Rejected';
+  applicant_skills?: string[];
+  applicant_reviews?: Array<{ score?: number; comment?: string; projectName?: string }>;
+};
+
+type ApiApplicationsResponse = { applications: ApiApplicant[] };
+
+function mapApiApplicantToApplicant(api: ApiApplicant): Applicant {
+  return {
+    id: String(api.application_id),
+    name: api.applicant_name ?? api.applicant_id,
+    skills: Array.isArray(api.applicant_skills) ? api.applicant_skills : [],
+    profileText: api.applicant_profile_text ?? '',
+    website: api.applicant_website_link ?? '',
+    motivation: api.applicant_motivation ?? '',
+    appliedDate: api.applicant_date ?? '',
+    status: api.status,
+    avgRating: undefined,
+    reviewCount: api.applicant_reviews ? api.applicant_reviews.length : 0,
+    pastReviews: api.applicant_reviews
+      ? api.applicant_reviews.map(r => ({ score: r.score ?? 0, comment: r.comment ?? '', projectName: r.projectName ?? '' }))
+      : [],
+  };
+}
+
+function displaySkill(skill: string): string {
+  const key = skill.trim().toLowerCase();
+  return SKILL_DISPLAY_MAP[key] || skill.charAt(0).toUpperCase() + skill.slice(1);
+}
+
+export function ApplicantManagement({ projectId, currentUserId, onBack }: ApplicantManagementProps) {
+  const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [selectedApplicant, setSelectedApplicant] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoading(true);
+    setError(null);
+
+    fetch(`http://127.0.0.1:8000/applications/viewapplications/${projectId}?current_user_id=${currentUserId}`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
+        return res.json();
+      })
+      .then((data: ApiApplicationsResponse | ApiApplicant[]) => {
+        if (!mounted) return;
+        // API may return either { applications: [...] } or an array directly of ApiApplicant
+        let apiList: ApiApplicant[];
+        if (Array.isArray(data)) {
+          apiList = data;
+        } else if (data && Array.isArray(data.applications)) {
+          apiList = data.applications;
+        } else {
+          throw new Error('Unexpected response shape from applications API');
+        }
+
+        const mapped = apiList.map(mapApiApplicantToApplicant);
+        setApplicants(mapped);
+      })
+      .catch((err: any) => {
+        if (mounted) setError(err?.message ?? 'Unknown error');
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [projectId, currentUserId]);
 
   const handleAccept = (id: string) => {
-    setApplicants(prev => prev.map(app =>
-      app.id === id ? { ...app, status: 'Accepted' as const } : app
+    setApplicants((prev: Applicant[]) => prev.map((app: Applicant) =>
+      app.id === id ? { ...app, status: 'Accepted' } : app
     ));
   };
 
   const handleReject = (id: string) => {
-    setApplicants(prev => prev.map(app =>
-      app.id === id ? { ...app, status: 'Rejected' as const } : app
+    setApplicants((prev: Applicant[]) => prev.map((app: Applicant) =>
+      app.id === id ? { ...app, status: 'Rejected' } : app
     ));
   };
 
-  const pendingApplicants = applicants.filter(a => a.status === 'Pending');
-  const acceptedApplicants = applicants.filter(a => a.status === 'Accepted');
-  const rejectedApplicants = applicants.filter(a => a.status === 'Rejected');
+  const safeApplicants = Array.isArray(applicants) ? applicants : [];
+  const pendingApplicants = safeApplicants.filter(a => a.status === 'Pending');
+  const acceptedApplicants = safeApplicants.filter(a => a.status === 'Accepted');
+  const rejectedApplicants = safeApplicants.filter(a => a.status === 'Rejected');
 
-  const ApplicantCard = ({ applicant }: { applicant: typeof mockApplicants[0] }) => (
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto py-12 text-center">로딩 중...</div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-5xl mx-auto py-12 text-center text-red-600">에러: {error}</div>
+    );
+  }
+
+  const ApplicantCard = ({ applicant }: { applicant: Applicant }) => (
     <Card className="p-4 md:p-6 shadow-lg hover:shadow-xl transition-shadow bg-gradient-to-br from-white to-slate-50/30">
       <div className="flex flex-col sm:flex-row items-start gap-4">
         <Avatar className="h-12 w-12 ring-2 ring-indigo-100 ring-offset-2">
@@ -103,12 +162,12 @@ export function ApplicantManagement({ projectId, onBack }: ApplicantManagementPr
             <div>
               <h3 className="mb-1">{applicant.name}</h3>
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1">
                   <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span>{applicant.avgRating.toFixed(1)}</span>
+                  <span>{applicant.avgRating ? applicant.avgRating.toFixed(1) : '—'}</span>
                 </div>
                 <span>·</span>
-                <span>평가 {applicant.reviewCount}건</span>
+                <span>평가 {applicant.reviewCount ?? 0}건</span>
                 <span>·</span>
                 <span>{applicant.appliedDate}</span>
               </div>
@@ -146,9 +205,9 @@ export function ApplicantManagement({ projectId, onBack }: ApplicantManagementPr
           </div>
 
           <div className="flex flex-wrap gap-2 mb-3">
-            {applicant.skills.map((skill, idx) => (
+            {applicant.skills.map((skill: string, idx: number) => (
               <Badge key={idx} variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
-                {skill}
+                {displaySkill(skill)}
               </Badge>
             ))}
           </div>
@@ -190,7 +249,7 @@ export function ApplicantManagement({ projectId, onBack }: ApplicantManagementPr
             {selectedApplicant === applicant.id && (
               <div className="mt-4 space-y-3">
                 <Separator />
-                {applicant.pastReviews.map((review, idx) => (
+                {applicant.pastReviews?.map((review: PastReview, idx: number) => (
                   <div key={idx} className="pl-4 border-l-2 border-indigo-200 bg-indigo-50/30 py-2 rounded-r">
                     <div className="flex items-center gap-2 mb-1">
                       <div className="flex items-center gap-1">

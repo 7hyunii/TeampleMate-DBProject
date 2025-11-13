@@ -1,6 +1,9 @@
 from fastapi import FastAPI
-from api.routes import router
 from fastapi.middleware.cors import CORSMiddleware
+from api.v1.endpoints.auth import router as auth_router
+from api.v1.endpoints.profile import router as profile_router
+from api.v1.endpoints.projects import router as projects_router
+from api.v1.endpoints.applications import router as applications_router
 
 app = FastAPI()
 
@@ -13,4 +16,7 @@ app.add_middleware(
 	allow_headers=["*"],
 )
 
-app.include_router(router)
+app.include_router(auth_router)
+app.include_router(profile_router)
+app.include_router(projects_router)
+app.include_router(applications_router)

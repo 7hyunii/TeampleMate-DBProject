@@ -98,6 +98,7 @@ export default function Home() {
         {currentView === 'applicant-management' && selectedProjectId && (
           <ApplicantManagement
             projectId={selectedProjectId}
+            currentUserId={userId}
             onBack={() => setCurrentView('my-projects')}
           />
         )}

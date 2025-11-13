@@ -66,7 +66,7 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
     if (searchInput.trim() !== "") {
       params.append('search', searchInput.trim());
     }
-    fetch(`http://localhost:8000/projects?${params.toString()}`)
+    fetch(`http://localhost:8000/projects/list?${params.toString()}`)
       .then(res => res.ok ? res.json() : Promise.reject(res))
       .then(data => {
         setProjects(data.projects.map((p: any) => ({

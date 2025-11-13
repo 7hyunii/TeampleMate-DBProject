@@ -40,7 +40,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     try {
       if (isLogin) {
         // 로그인 API 호출
-        const res = await fetch("http://localhost:8000/login", {
+        const res = await fetch("http://localhost:8000/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ uid, password }),
@@ -60,7 +60,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
         }
       } else {
         // 회원가입 API 호출
-        const res = await fetch("http://localhost:8000/signup", {
+        const res = await fetch("http://localhost:8000/auth/signup", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ uid, password, name }),

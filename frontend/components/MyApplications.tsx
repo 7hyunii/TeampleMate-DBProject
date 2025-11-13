@@ -28,7 +28,7 @@ export function MyApplications({ currentUserId }: { currentUserId: string }) {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch(`http://localhost:8000/myapplications/${currentUserId}`);
+        const res = await fetch(`http://localhost:8000/applications/me?current_user_id=${currentUserId}`);
         if (!res.ok) throw new Error("데이터를 불러올 수 없습니다.");
         const data = await res.json();
         setApplications(Array.isArray(data) ? data : Array.isArray(data.applications) ? data.applications : []);

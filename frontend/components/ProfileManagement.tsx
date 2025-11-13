@@ -40,7 +40,7 @@ function displaySkill(skill: string): string {
     setEmail(userEmail || "");
     setProfileText(globalProfileText || "");
     setWebsite(globalWebsite || "");
-    fetch(`http://localhost:8000/profile?uid=${userId}`)
+    fetch(`http://localhost:8000/profile/info/${userId}`)
       .then(res => res.ok ? res.json() : null)
       .then(data => {
         if (data && Array.isArray(data.skills)) {
@@ -63,10 +63,9 @@ function displaySkill(skill: string): string {
   };
 
   const handleSave = async () => {
-    // DB에 저장: PATCH /profile/update
     try {
-      const res = await fetch("http://localhost:8000/profile/update", {
-        method: "PATCH",
+      const res = await fetch(`http://localhost:8000/profile/update/${userId}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           uid: userId, 
