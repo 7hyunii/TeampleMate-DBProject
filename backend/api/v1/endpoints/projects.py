@@ -9,7 +9,7 @@ from schemas.schemas import (
 )
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from crud.crud_porojects import create_project_with_skills, get_all_projects, get_project_details
+from crud.crud_projects import create_project_with_skills, get_all_projects, get_project_details
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
