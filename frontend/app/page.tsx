@@ -118,6 +118,7 @@ export default function Home() {
             onCreateProject={handleCreateProject}
             onManageApplicants={handleManageApplicants}
             onReviewTeam={handleReviewTeam}
+            onViewProject={handleViewDetail}
           />
         )}
         {currentView === 'peer-review' && selectedProjectId && (

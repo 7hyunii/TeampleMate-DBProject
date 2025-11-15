@@ -12,6 +12,7 @@ interface MyProjectsProps {
   onCreateProject: () => void;
   onManageApplicants: (projectId: string) => void;
   onReviewTeam: (projectId: string) => void;
+  onViewProject: (projectId: string) => void;
 }
 
 type ProjectItem = {
@@ -25,7 +26,7 @@ type ProjectItem = {
   needsReview?: boolean;
 };
 
-export function MyProjects({ onCreateProject, onManageApplicants, onReviewTeam }: MyProjectsProps) {
+export function MyProjects({ onCreateProject, onManageApplicants, onReviewTeam, onViewProject }: MyProjectsProps) {
   const { userId } = useAuth();
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -77,7 +78,18 @@ export function MyProjects({ onCreateProject, onManageApplicants, onReviewTeam }
   };
 
   const ProjectCard = ({ project }: { project: ProjectItem }) => (
-    <Card className="p-6 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-white to-slate-50/30 relative overflow-hidden">
+    <Card
+      role="button"
+      tabIndex={0}
+      onClick={() => onViewProject(String(project.project_id))}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onViewProject(String(project.project_id));
+        }
+      }}
+      className="p-6 shadow-lg hover:shadow-xl transition-all bg-gradient-to-br from-white to-slate-50/30 relative overflow-hidden cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-400"
+    >
       <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-100/30 to-purple-100/30 rounded-full blur-3xl -z-0" />
       <div className="relative z-10">
         <div className="flex items-start justify-between mb-4">
@@ -111,7 +123,10 @@ export function MyProjects({ onCreateProject, onManageApplicants, onReviewTeam }
           {project.status === 'Completed' && project.needsReview && (
             <Button
               size="sm"
-              onClick={() => onReviewTeam(String(project.project_id))}
+              onClick={(e) => {
+                e.stopPropagation();
+                onReviewTeam(String(project.project_id));
+              }}
               className="gap-2 shadow-md hover:shadow-lg transition-shadow w-full sm:w-auto"
             >
               <Star className="h-4 w-4" />

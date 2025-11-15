@@ -21,7 +21,7 @@ def apply_to_project(db: Session, project_id: int, applicant_id: str, applicant_
     db.commit()
 
 
-def get_applications_by_applicant(db: Session, current_user_id: str) -> list[dict]:
+def get_applications_by_applicant(db: Session, current_user_id: str) -> list[dict] | None:
     """
     내 지원 현황 조회
     """
@@ -51,7 +51,7 @@ def get_applications_by_applicant(db: Session, current_user_id: str) -> list[dic
     return applications
 
 
-def get_applications_by_project(db: Session, project_id: int, current_user_id: str) -> list[dict] | None:
+def get_applications_by_project(db: Session, project_id: int, current_user_id: str) -> list[dict]:
     """
     프로젝트에 대한 지원자 목록 조회 (리더 전용)
     - 호출자의 uid가 프로젝트의 leader_id와 다르면 PermissionError 발생
@@ -89,7 +89,7 @@ def get_applications_by_project(db: Session, project_id: int, current_user_id: s
     finally:
         conn.close()
     if not rows:
-        return None
+        return []
 
     applications = [dict(r) for r in rows]
     return applications

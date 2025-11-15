@@ -12,7 +12,7 @@ import { Separator } from './ui/separator';
 
 interface ApplicantManagementProps {
   projectId: string;
-  applicantId: string;
+  applicantId?: string;
   currentUserId: string;
   onBack: () => void;
 }

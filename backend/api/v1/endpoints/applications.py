@@ -39,16 +39,16 @@ def get_project_applications(project_id: int, current_user_id: str, db: Session 
     프로젝트에 대한 지원자 목록 조회 (리더 전용)
     """
     try:
-        try:
-            applications = get_applications_by_project(db, project_id, current_user_id)
-        except PermissionError as e:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
-
-        if not applications:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당 프로젝트에 대한 지원 내역이 없습니다.")
-        return ApplicationsManagementResponse(applications=applications)
+        applications = get_applications_by_project(db, project_id, current_user_id)
+    except PermissionError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="서버 오류: " + str(e))
+
+    if applications is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당 프로젝트를 찾을 수 없습니다.")
+
+    return ApplicationsManagementResponse(applications=applications)
     
 @router.put("/projects/{project_id}/applications/{applicant_id}/status", response_model=MessageResponse, status_code=status.HTTP_200_OK)
 def update_application_status_endpoint(project_id: int, applicant_id: str, req: ApplicationStatusUpdateRequest, db: Session = Depends(get_db)) -> MessageResponse:
