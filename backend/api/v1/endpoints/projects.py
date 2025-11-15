@@ -6,10 +6,12 @@ from schemas.schemas import (
     ProjectListResponse,
     ProjectListItem,
     ProjectDetailsResponse,
+    MyProjectListItem,
+    MyProjectListResponse,
 )
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from crud.crud_projects import create_project_with_skills, get_all_projects, get_project_details
+from crud.crud_projects import create_project_with_skills, get_all_projects, get_project_details, get_my_projects
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -39,6 +41,20 @@ def get_projects(req: ProjectListRequest = Depends(), db: Session = Depends(get_
         projects = get_all_projects(db, req.orderBy.value, req.groupBy.value, req.search)
         items = [ProjectListItem(**p) for p in projects]
         return ProjectListResponse(projects=items)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.get("/me", response_model=MyProjectListResponse, status_code=status.HTTP_200_OK)
+def get_mine(current_user_id: str, db: Session = Depends(get_db)) -> MyProjectListResponse:
+    """
+    내 프로젝트 목록 조회
+
+    자신이 리더, 멤버인 프로젝트들 모두 반환
+    """
+    try:
+        results = get_my_projects(db, current_user_id)
+        items = [MyProjectListItem(**p) for p in results]
+        return MyProjectListResponse(projects=items)
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 

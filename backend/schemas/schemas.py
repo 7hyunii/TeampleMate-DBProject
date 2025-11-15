@@ -136,3 +136,15 @@ class newStatus(str, Enum):
 class ApplicationStatusUpdateRequest(BaseModel):
     new_status: newStatus = newStatus.Pending
     leader_id: str
+
+class MyProjectListItem(BaseModel):
+    project_id: int
+    leader_id: str
+    title: str
+    status: str
+    members_count: int
+    capacity: int
+    deadline: date
+
+class MyProjectListResponse(BaseModel):
+    projects: list[MyProjectListItem]

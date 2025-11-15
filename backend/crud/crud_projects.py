@@ -225,3 +225,51 @@ def get_project_details(db: Session, project_id: int, applicant_id: str = None) 
     project["members_count"] = member_count + 1
 
     return project
+
+def get_my_projects(db: Session, current_user_id: str) -> list:
+    """
+    현재 사용자가 리더이거나 멤버(수락된 지원자)인 프로젝트 목록 조회
+
+    반환: 프로젝트 항목들의 리스트 (각 항목은 dict)
+    """
+    res = db.execute(text(
+        """
+        SELECT
+            p.project_id,
+            p.leader_id,
+            p.topic AS title,
+            p.status,
+            p.capacity,
+            p.deadline,
+            (
+                SELECT COUNT(DISTINCT member_uid) FROM (
+                    SELECT applicant_id AS member_uid FROM Applications WHERE project_id = p.project_id AND status = 'Accepted'
+                    UNION
+                    SELECT leader_id AS member_uid FROM Projects WHERE project_id = p.project_id
+                ) AS members
+            ) AS members_count
+        FROM Projects p
+           WHERE (p.leader_id = :uid
+             OR p.project_id IN (
+                 SELECT project_id FROM Applications WHERE applicant_id = :uid AND status = 'Accepted'
+             ))
+            AND NOT (p.status = 'Recruiting' AND p.deadline < CURRENT_DATE)
+        ORDER BY p.deadline ASC
+        """
+    ), {"uid": current_user_id})
+    rows = res.fetchall()
+
+    projects: list[dict] = []
+    for row in rows:
+        mapping = row._mapping
+        projects.append({
+            "project_id": int(mapping.get("project_id")),
+            "leader_id": mapping.get("leader_id"),
+            "title": mapping.get("title"),
+            "status": mapping.get("status"),
+            "members_count": int(mapping.get("members_count") or 0),
+            "capacity": mapping.get("capacity"),
+            "deadline": mapping.get("deadline"),
+        })
+
+    return projects
