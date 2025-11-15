@@ -9,9 +9,8 @@ import { Textarea } from "./ui/textarea";
 import { useState, useEffect } from "react";
 
 interface Member {
-  id: string;
+  uid: string;
   name: string;
-  role: string;
   skills: string[];
 }
 
@@ -28,7 +27,7 @@ interface Project {
   status: "Recruiting" | "In Progress" | "Completed";
   can_apply: boolean;
   members: Member[];
-  current_members: number;
+  members_count: number;
 }
 
 interface ProjectDetailProps {
@@ -125,26 +124,20 @@ export function ProjectDetail({
     fullDescription: project.description2,
     skills: project.skills,
     capacity: project.capacity,
-    currentMembers: 0,  // 현재 팀원 수 (추후 API에서 받아올 예정)
+    currentMembers: project.members_count,  // 현재 팀원 수 (추후 API에서 받아올 예정)
     deadline: project.deadline,
     status: project.status,
     can_apply: project.can_apply,
-    members: [  // 팀원 정보
-      // 예시 mock
-      {
-        id: "user1",
-        name: "김민수",
-        role: "리더",
-        skills: ["React Native", "TypeScript"],
-      },
-      {
-        id: "user2",
-        name: "이지은",
-        role: "팀원",
-        skills: ["Node.js", "MongoDB"],
-      },
-    ],
+    members: project.members,
   };
+
+  const membersOrdered = (() => {
+    if (!ProjectDetails.members || !ProjectDetails.members.length) return [];
+    const leaderUid = project.leader_id;
+    const leader = ProjectDetails.members.find((m) => m.uid === leaderUid);
+    const others = ProjectDetails.members.filter((m) => m.uid !== leaderUid);
+    return leader ? [leader, ...others] : [...ProjectDetails.members];
+  })();
 
   const isLeader = ProjectDetails.leaderId === currentUserId;
   const daysUntilDeadline = Math.ceil(
@@ -254,7 +247,7 @@ export function ProjectDetail({
           </Card>
 
           <Card className="p-6 shadow-lg bg-gradient-to-br from-white to-indigo-50/20">
-            <div className="flex items-center gap-2 mb-5">
+            <div className="flex items-center gap-2 mb-1">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                 <Users className="h-4 w-4 text-white" />
               </div>
@@ -264,9 +257,9 @@ export function ProjectDetail({
               </h3>
             </div>
             <div className="space-y-3">
-              {ProjectDetails.members.map((member) => (
+              {membersOrdered.map((member) => (
                 <div
-                  key={member.id}
+                  key={member.uid}
                   className="flex items-center justify-between p-4 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-shadow"
                 >
                   <div>
@@ -274,7 +267,7 @@ export function ProjectDetail({
                       <span className="font-medium text-slate-900">
                         {member.name}
                       </span>
-                      {member.role === "리더" && (
+                      {member.uid === project.leader_id && (
                         <Badge
                           variant="outline"
                           className="text-xs bg-indigo-50 text-indigo-700 border-indigo-200"
@@ -284,15 +277,18 @@ export function ProjectDetail({
                       )}
                     </div>
                     <div className="flex gap-1.5">
-                      {member.skills.map((skill, idx) => (
-                        <Badge
-                          key={idx}
-                          variant="outline"
-                          className="text-xs bg-slate-50"
-                        >
-                          {skill}
-                        </Badge>
-                      ))}
+                      {member.skills?.map((skill, idx) => {
+                        const display = SKILL_DISPLAY_MAP[skill.toLowerCase()] || (skill.charAt(0).toUpperCase() + skill.slice(1));
+                        return (
+                          <Badge
+                            key={idx}
+                            variant="outline"
+                            className="text-xs bg-slate-50 text-slate-700 border-slate-200 px-2 py-0.5 rounded-md"
+                          >
+                            {display}
+                          </Badge>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>

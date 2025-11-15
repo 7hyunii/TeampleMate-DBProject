@@ -183,4 +183,45 @@ def get_project_details(db: Session, project_id: int, applicant_id: str = None) 
     else:
         project["can_apply"] = True
 
+    # 프로젝트 멤버 목록 조회
+    members_res = db.execute(text(
+        """
+        SELECT s.uid, s.name,
+            COALESCE(array_agg(sk.skill_name) FILTER (WHERE sk.skill_name IS NOT NULL), ARRAY[]::text[]) AS skills
+        FROM Students s
+        LEFT JOIN Student_Skills ss ON ss.uid = s.uid
+        LEFT JOIN Skills sk ON sk.skill_id = ss.skill_id
+        WHERE s.uid IN (
+            SELECT applicant_id FROM Applications WHERE project_id = :project_id AND status = 'Accepted'
+            UNION
+            SELECT leader_id FROM Projects WHERE project_id = :project_id
+        )
+        GROUP BY s.uid, s.name
+        ORDER BY s.name
+        """
+    ), {"project_id": project_id})
+
+    members_rows = members_res.fetchall()
+    members_list: list[dict] = []
+    for row in members_rows:
+        mapping = row._mapping
+        uid = mapping.get("uid")
+        name = mapping.get("name")
+        skills = mapping.get("skills") or []
+        members_list.append({
+            "uid": uid,
+            "name": name,
+            "skills": list(skills),
+        })
+
+    project["members"] = members_list
+
+    # 멤버 수 조회 
+    count_res = db.execute(text(
+        "SELECT COUNT(DISTINCT a.applicant_id) AS cnt FROM Applications a WHERE a.project_id = :project_id AND a.status = 'Accepted'"
+    ), {"project_id": project_id})
+    count_row = count_res.fetchone()
+    member_count = int(count_row[0]) if count_row and count_row[0] is not None else 0
+    project["members_count"] = member_count + 1
+
     return project

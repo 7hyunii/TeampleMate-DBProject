@@ -88,6 +88,9 @@ class ProjectDetailsResponse(BaseModel):
     status: str
     skills: list[str] = []
     can_apply: bool
+    members: list[dict] = []
+    members_count: int
+
 
 class ApplicationRequest(BaseModel):
     applicant_id: str
