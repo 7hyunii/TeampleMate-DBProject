@@ -88,6 +88,7 @@ export function ProjectDetail({
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [processingAction, setProcessingAction] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchProject() {
@@ -97,6 +98,15 @@ export function ProjectDetail({
         const res = await fetch(`http://localhost:8000/projects/${projectId}?applicant_id=${currentUserId}`);
         if (!res.ok) throw new Error("프로젝트 정보를 불러올 수 없습니다.");
         const data = await res.json();
+        // Normalize backend status formats (e.g., 'In_Progress') to UI-friendly 'In Progress'
+        const normalize = (s: any) => {
+          if (!s) return s;
+          if (s === 'In_Progress' || s === 'In-Progress' || s === 'InProgress') return 'In Progress';
+          if (s.toLowerCase() === 'completed') return 'Completed';
+          if (s === 'Recruiting') return 'Recruiting';
+          return s;
+        };
+        data.status = normalize(data.status);
         setProject(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "알 수 없는 오류");
@@ -124,7 +134,7 @@ export function ProjectDetail({
     fullDescription: project.description2,
     skills: project.skills,
     capacity: project.capacity,
-    currentMembers: project.members_count,  // 현재 팀원 수 (추후 API에서 받아올 예정)
+    currentMembers: project.members_count,
     deadline: project.deadline,
     status: project.status,
     can_apply: project.can_apply,
@@ -168,6 +178,35 @@ export function ProjectDetail({
       setMotivation("");
     } catch (err) {
       alert("서버 오류로 지원에 실패했습니다.");
+    }
+  };
+
+  const updateProjectStatus = async (newStatus: string) => {
+    const pretty = newStatus === 'In Progress' ? '진행중' : newStatus === 'Completed' ? '완료' : newStatus;
+    if (!confirm(`프로젝트 상태를 '${pretty}'(으)로 변경하시겠습니까?`)) return;
+    setProcessingAction(newStatus);
+    try {
+      const payloadStatus = newStatus === 'In Progress' ? 'In_Progress' : newStatus === 'Completed' ? 'Completed' : newStatus;
+      const res = await fetch(`http://localhost:8000/projects/${projectId}/status`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ new_status: payloadStatus, leader_id: currentUserId }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        // Pydantic 422 errors have detail as an array of objects — format for readability
+        if (data && Array.isArray(data.detail)) {
+          const msgs = data.detail.map((d: any) => d.msg || JSON.stringify(d)).join('; ');
+          throw new Error(msgs || '상태 변경에 실패했습니다.');
+        }
+        throw new Error(data.detail || '상태 변경에 실패했습니다.');
+      }
+      setProject(prev => prev ? { ...prev, status: newStatus as Project['status'] } : prev);
+      alert('상태가 성공적으로 변경되었습니다.');
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '서버 오류');
+    } finally {
+      setProcessingAction(null);
     }
   };
 
@@ -419,12 +458,42 @@ export function ProjectDetail({
           )}
 
           {isLeader && (
-            <Button
-              onClick={() => onManageApplicants && onManageApplicants(projectId)}
-              className="w-full"
-            >
-              지원자 관리
-            </Button>
+            <div>
+              {/* 모집중일 때만 지원자 관리 버튼 노출 */}
+              {ProjectDetails.status === 'Recruiting' && (
+                <div>
+                  <Button
+                    onClick={() => onManageApplicants && onManageApplicants(projectId)}
+                    className="w-full"
+                  >
+                    지원자 관리
+                  </Button>
+
+                  <div className="mt-4">
+                    <Button
+                      onClick={() => updateProjectStatus('In Progress')}
+                      className="w-full bg-orange-400 hover:bg-orange-500 text-white shadow-md"
+                      disabled={processingAction === 'In Progress'}
+                    >
+                      {processingAction === 'In Progress' ? '처리 중...' : '지원 마감'}
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {/* 진행중일 때는 지원자 관리 버튼을 숨기고 프로젝트 완료 버튼만 표시 */}
+              {ProjectDetails.status === 'In Progress' && (
+                <div className="mt-2">
+                  <Button
+                    onClick={() => updateProjectStatus('Completed')}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white shadow-md"
+                    disabled={processingAction === 'Completed'}
+                  >
+                    {processingAction === 'Completed' ? '처리 중...' : '프로젝트 완료'}
+                  </Button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>

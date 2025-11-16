@@ -8,10 +8,11 @@ from schemas.schemas import (
     ProjectDetailsResponse,
     MyProjectListItem,
     MyProjectListResponse,
+    ProjectStatusUpdateRequest,
 )
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from crud.crud_projects import create_project_with_skills, get_all_projects, get_project_details, get_my_projects
+from crud.crud_projects import create_project_with_skills, get_all_projects, get_project_details, get_my_projects, update_project_status
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -67,3 +68,19 @@ def get_details(project_id: int, applicant_id: str = None, db: Session = Depends
     if not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당 프로젝트를 찾을 수 없습니다.")
     return ProjectDetailsResponse(**result)
+
+
+@router.put("/{project_id}/status", response_model=MessageResponse, status_code=status.HTTP_200_OK)
+def put_project_status(project_id: int, req: ProjectStatusUpdateRequest, db: Session = Depends(get_db)) -> MessageResponse:
+    """
+    프로젝트 상태를 리더가 변경합니다.
+    """
+    try:
+        updated = update_project_status(db, project_id, req.leader_id, req.new_status)
+        if not updated:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당 프로젝트를 찾을 수 없습니다.")
+        return MessageResponse(msg="프로젝트 상태가 업데이트되었습니다.")
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

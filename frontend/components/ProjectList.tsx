@@ -69,6 +69,14 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
     fetch(`http://localhost:8000/projects/list?${params.toString()}`)
       .then(res => res.ok ? res.json() : Promise.reject(res))
       .then(data => {
+        const normalizeStatus = (s: any) => {
+          if (!s) return s;
+          if (s === 'In_Progress') return 'In Progress';
+          if (String(s) === 'Completed') return 'Completed';
+          if (String(s) === 'Recruiting') return 'Recruiting';
+          return s;
+        };
+
         setProjects(data.projects.map((p: any) => ({
           id: p.project_id,
           title: p.topic,
@@ -79,7 +87,7 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
           capacity: p.capacity,
           // currentMembers: 0, // TODO: 실제 인원 구현 시 수정
           deadline: p.deadline,
-          status: p.status,
+          status: normalizeStatus(p.status),
         })));
       })
       .catch(() => setProjects([]))

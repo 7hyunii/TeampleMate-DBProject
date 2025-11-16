@@ -148,3 +148,12 @@ class MyProjectListItem(BaseModel):
 
 class MyProjectListResponse(BaseModel):
     projects: list[MyProjectListItem]
+
+class newProjectStatus(str, Enum):
+    Recruiting = "Recruiting"
+    In_Progress = "In_Progress"
+    Completed = "Completed"
+
+class ProjectStatusUpdateRequest(BaseModel):
+    new_status: newProjectStatus
+    leader_id: str

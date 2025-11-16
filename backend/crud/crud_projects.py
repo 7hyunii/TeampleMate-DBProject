@@ -273,3 +273,51 @@ def get_my_projects(db: Session, current_user_id: str) -> list:
         })
 
     return projects
+
+
+def update_project_status(db: Session, project_id: int, leader_id: str, new_status: str) -> bool:
+    """
+    프로젝트 상태 변경
+    """
+    # 1) 프로젝트 존재 및 리더 확인
+    res = db.execute(text(
+        "SELECT leader_id FROM Projects WHERE project_id = :project_id"), {"project_id": project_id})
+    row = res.fetchone()
+    if not row:
+        return False
+    project_leader = row[0]
+
+    # 2) 권한 검증
+    if project_leader != leader_id:
+        raise PermissionError("권한이 없습니다. 프로젝트 리더만 상태를 변경할 수 있습니다.")
+
+    # 3) 리더 권한으로 실제 쿼리를 실행
+    engine = db.get_bind()
+    conn = engine.connect()
+    try:
+        try:
+            conn.execute(text("BEGIN"))
+            conn.execute(text("SET ROLE leader"))
+            update_result = conn.execute(text(
+                """
+                UPDATE Projects
+                SET status = :new_status
+                WHERE project_id = :project_id
+                """
+            ), 
+            {
+                "new_status": new_status,
+                "project_id": project_id,
+            })
+            conn.execute(text("RESET ROLE"))
+            conn.execute(text("COMMIT"))
+        except Exception as e:
+            conn.execute(text("ROLLBACK"))
+            raise PermissionError("리더 권한 획득 또는 업데이트 실패: " + str(e))
+
+        if update_result.rowcount == 0:
+            raise ValueError("프로젝트 상태 업데이트에 실패했습니다.")
+    finally:
+        conn.close()
+
+    return True
