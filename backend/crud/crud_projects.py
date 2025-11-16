@@ -341,3 +341,48 @@ def update_project_status(db: Session, project_id: int, leader_id: str, new_stat
         conn.close()
 
     return True
+
+
+def delete_project(db: Session, project_id: int, leader_id: str) -> bool:
+    """
+    프로젝트 삭제
+    """
+    # 1) 프로젝트 존재 및 리더 확인
+    res = db.execute(text("SELECT leader_id FROM Projects WHERE project_id = :project_id"), {"project_id": project_id})
+    row = res.fetchone()
+    if not row:
+        return False
+    project_leader = row[0]
+
+    # 2) 권한 검증
+    if project_leader != leader_id:
+        raise PermissionError("권한이 없습니다. 프로젝트 리더만 삭제할 수 있습니다.")
+
+    # 3) 리더 권한으로 삭제 실행
+    engine = db.get_bind()
+    conn = engine.connect()
+    try:
+        try:
+            conn.execute(text("BEGIN"))
+            conn.execute(text("SET ROLE leader"))
+
+            # 트랜잭션
+            # 관련된 애플리케이션 삭제
+            conn.execute(text("DELETE FROM Applications WHERE project_id = :project_id"), {"project_id": project_id})
+            # 관련된 요구 스킬 매핑 삭제
+            conn.execute(text("DELETE FROM Project_Required_Skills WHERE project_id = :project_id"), {"project_id": project_id})
+            # 프로젝트 삭제
+            delete_result = conn.execute(text("DELETE FROM Projects WHERE project_id = :project_id"), {"project_id": project_id})
+
+            conn.execute(text("RESET ROLE"))
+            conn.execute(text("COMMIT"))
+        except Exception as e:
+            conn.execute(text("ROLLBACK"))
+            raise PermissionError("리더 권한 획득 또는 삭제 실패: " + str(e))
+
+        if delete_result.rowcount == 0:
+            raise ValueError("프로젝트 삭제에 실패했습니다.")
+    finally:
+        conn.close()
+
+    return True

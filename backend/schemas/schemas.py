@@ -158,3 +158,7 @@ class newProjectStatus(str, Enum):
 class ProjectStatusUpdateRequest(BaseModel):
     new_status: newProjectStatus
     leader_id: str
+
+
+class ProjectDeleteRequest(BaseModel):
+    leader_id: str

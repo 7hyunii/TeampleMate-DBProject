@@ -9,10 +9,18 @@ from schemas.schemas import (
     MyProjectListItem,
     MyProjectListResponse,
     ProjectStatusUpdateRequest,
+    ProjectDeleteRequest
 )
 from sqlalchemy.orm import Session
 from api.deps import get_db
-from crud.crud_projects import create_project_with_skills, get_all_projects, get_project_details, get_my_projects, update_project_status
+from crud.crud_projects import (
+    create_project_with_skills,
+    get_all_projects,
+    get_project_details,
+    get_my_projects,
+    update_project_status,
+    delete_project,
+)
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 
@@ -81,6 +89,22 @@ def put_project_status(project_id: int, req: ProjectStatusUpdateRequest, db: Ses
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당 프로젝트를 찾을 수 없습니다.")
         return MessageResponse(msg="프로젝트 상태가 업데이트되었습니다.")
     except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.delete("/{project_id}", response_model=MessageResponse, status_code=status.HTTP_200_OK)
+def delete_project_endpoint(project_id: int, req: ProjectDeleteRequest, db: Session = Depends(get_db)) -> MessageResponse:
+    """
+    프로젝트 삭제 (지원자를 아무도 승인하지 않았을 때, 리더만 가능).
+    """
+    try:
+        deleted = delete_project(db, project_id, req.leader_id)
+        if not deleted:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="해당 프로젝트를 찾을 수 없습니다.")
+        return MessageResponse(msg="프로젝트가 삭제되었습니다.")
+    except PermissionError as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

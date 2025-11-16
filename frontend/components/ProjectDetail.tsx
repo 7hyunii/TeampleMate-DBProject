@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowLeft, Calendar, Users, Clock, User, Send } from "lucide-react";
+import { ArrowLeft, Calendar, Users, Clock, User, Send, Trash } from "lucide-react";
 import { SKILL_DISPLAY_MAP } from "../constants/skills";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -210,6 +210,28 @@ export function ProjectDetail({
     }
   };
 
+  const deleteProject = async () => {
+    if (!confirm('정말 이 프로젝트를 삭제하시겠습니까?\n삭제하면 복구할 수 없습니다.')) return;
+    setProcessingAction('deleting');
+    try {
+      const res = await fetch(`http://localhost:8000/projects/${projectId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ leader_id: currentUserId }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || '프로젝트 삭제에 실패했습니다.');
+      }
+      alert('프로젝트가 삭제되었습니다.');
+      onBack();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : '서버 오류로 삭제에 실패했습니다.');
+    } finally {
+      setProcessingAction(null);
+    }
+  };
+
   const statusColors = {
     Recruiting:
       "bg-emerald-50 text-emerald-700 border-emerald-200",
@@ -250,15 +272,29 @@ export function ProjectDetail({
                   </span>
                 </div>
               </div>
-              <Badge
-                className={`${statusColors[ProjectDetails.status]} shadow-sm px-4 py-1.5 w-fit`}
-              >
-                {ProjectDetails.status === "Recruiting"
-                  ? "모집중"
-                  : ProjectDetails.status === "In Progress"
-                    ? "진행중"
-                    : "완료"}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge
+                  className={`${statusColors[ProjectDetails.status]} shadow-sm px-4 py-1.5 w-fit`}
+                >
+                  {ProjectDetails.status === "Recruiting"
+                    ? "모집중"
+                    : ProjectDetails.status === "In Progress"
+                      ? "진행중"
+                      : "완료"}
+                </Badge>
+
+                {/* 리더이면서 유일한 멤버인 경우 헤더 옆에 삭제 버튼 노출 */}
+                {isLeader && ProjectDetails.currentMembers === 1 && (
+                  <Button
+                    onClick={deleteProject}
+                    className="ml-2 h-9 w-9 p-2 flex items-center justify-center bg-red-600 hover:bg-red-700 text-white shadow-sm rounded-md"
+                    disabled={processingAction === 'deleting'}
+                    aria-label="프로젝트 삭제"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             </div>
 
             <div className="flex flex-wrap gap-2 mb-1">
@@ -493,6 +529,7 @@ export function ProjectDetail({
                   </Button>
                 </div>
               )}
+              
             </div>
           )}
         </div>
