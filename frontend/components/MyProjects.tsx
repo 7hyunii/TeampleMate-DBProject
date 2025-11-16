@@ -8,6 +8,26 @@ import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { useAuth } from './AuthProvider';
 
+
+function MyProjectSkeletonCard() {
+  return (
+    <Card className="p-6 shadow-lg rounded-xl animate-pulse bg-white">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex-1">
+          <div className="h-4 w-2/3 bg-slate-200 rounded mb-3" />
+          <div className="h-3 w-1/2 bg-slate-100 rounded" />
+        </div>
+        <div className="h-8 w-20 bg-slate-200 rounded" />
+      </div>
+
+      <div className="flex items-center gap-3 mb-4">
+        <div className="h-8 w-8 bg-slate-100 rounded" />
+        <div className="h-8 w-24 bg-slate-100 rounded" />
+      </div>
+    </Card>
+  );
+}
+
 interface MyProjectsProps {
   onCreateProject: () => void;
   onManageApplicants: (projectId: string) => void;
@@ -160,7 +180,15 @@ export function MyProjects({ onCreateProject, onManageApplicants, onReviewTeam, 
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
-          {loading ? <div className="text-center py-12">로딩 중...</div> : error ? <div className="text-center py-12 text-red-500">{error}</div> : (
+          {loading ? (
+            <div className="grid grid-cols-1 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <MyProjectSkeletonCard key={i} />
+              ))}
+            </div>
+          ) : error ? (
+            <div className="text-center py-12 text-red-500">{error}</div>
+          ) : (
             projects.map(project => (
               <ProjectCard key={project.project_id} project={project} />
             ))
@@ -168,7 +196,13 @@ export function MyProjects({ onCreateProject, onManageApplicants, onReviewTeam, 
         </TabsContent>
 
         <TabsContent value="recruiting" className="space-y-4">
-          {recruitingProjects.length > 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <MyProjectSkeletonCard key={i} />
+              ))}
+            </div>
+          ) : recruitingProjects.length > 0 ? (
             recruitingProjects.map(project => (
               <ProjectCard key={project.project_id} project={project} />
             ))
@@ -180,7 +214,13 @@ export function MyProjects({ onCreateProject, onManageApplicants, onReviewTeam, 
         </TabsContent>
 
         <TabsContent value="progress" className="space-y-4">
-          {inProgressProjects.length > 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <MyProjectSkeletonCard key={i} />
+              ))}
+            </div>
+          ) : inProgressProjects.length > 0 ? (
             inProgressProjects.map(project => (
               <ProjectCard key={project.project_id} project={project} />
             ))
@@ -192,7 +232,13 @@ export function MyProjects({ onCreateProject, onManageApplicants, onReviewTeam, 
         </TabsContent>
 
         <TabsContent value="completed" className="space-y-4">
-          {completedProjects.length > 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-1 gap-4">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <MyProjectSkeletonCard key={i} />
+              ))}
+            </div>
+          ) : completedProjects.length > 0 ? (
             completedProjects.map(project => (
               <ProjectCard key={project.project_id} project={project} />
             ))

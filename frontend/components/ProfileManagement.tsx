@@ -108,13 +108,13 @@ function displaySkill(skill: string): string {
       </div>
 
       <Card className="p-8 shadow-lg bg-gradient-to-br from-white to-slate-50/30">
-        <div className="flex items-start gap-6 mb-8 pb-6 border-b border-slate-200">
-          <Avatar className="h-24 w-24 ring-4 ring-indigo-100 ring-offset-4">
+        <div className="flex flex-col sm:flex-row sm:items-start items-center gap-6 mb-8 pb-6 border-b border-slate-200">
+          <Avatar className="h-24 w-24 ring-4 ring-indigo-100 ring-offset-4 flex-shrink-0">
             <AvatarFallback className="text-3xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold">
               {name[0]}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <h3 className="font-medium mb-2 text-slate-900">{name}</h3>
             <p className="font-normal text-sm text-slate-600 mb-1">{email}</p>
             <div className="inline-flex items-center gap-2 mt-2 px-3 py-1.5 bg-indigo-50 rounded-lg">
@@ -123,10 +123,11 @@ function displaySkill(skill: string): string {
               </span>
             </div>
           </div>
-          <Button 
-            variant="outline" 
+          <Button
+            size="sm"
+            variant="outline"
             onClick={handleLogout}
-            className="border-red-200 text-red-600 hover:text-red-600 hover:bg-red-50 hover:border-red-300"
+            className="border-red-200 text-red-600 hover:text-red-600 hover:bg-red-50 hover:border-red-300 self-center sm:self-auto mt-1 sm:mt-0 px-3 py-1"
           >
             로그아웃
           </Button>
