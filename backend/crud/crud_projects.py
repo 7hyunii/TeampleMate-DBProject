@@ -133,6 +133,26 @@ def get_all_projects(db: Session, orderBy: str = "deadline", groupBy: str = "All
         project["skills"] = [r[0] for r in skills_res.fetchall()]
         projects.append(project)
 
+    if projects:
+        ids = [p["project_id"] for p in projects]
+        params = {f"id{i}": ids[i] for i in range(len(ids))}
+        in_clause = ",".join(f":id{i}" for i in range(len(ids)))
+        count_query = f"""
+            SELECT m.project_id, COUNT(DISTINCT m.member_uid) AS cnt
+            FROM (
+                SELECT project_id, applicant_id AS member_uid FROM Applications WHERE project_id IN ({in_clause}) AND status = 'Accepted'
+                UNION
+                SELECT project_id, leader_id AS member_uid FROM Projects WHERE project_id IN ({in_clause})
+            ) m
+            GROUP BY m.project_id
+            """
+        count_sql = text(count_query)
+        res_counts = db.execute(count_sql, params)
+        rows_counts = res_counts.fetchall()
+        counts_map = {r[0]: int(r[1]) for r in rows_counts}
+        for p in projects:
+            p["members_count"] = counts_map.get(p["project_id"], 0)
+
     return projects
 
 

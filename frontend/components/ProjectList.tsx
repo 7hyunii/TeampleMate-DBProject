@@ -85,7 +85,7 @@ export function ProjectList({ onViewDetail, onCreateProject }: ProjectListProps)
           leader: p.leader_name,
           skills: p.skills,
           capacity: p.capacity,
-          // currentMembers: 0, // TODO: 실제 인원 구현 시 수정
+          currentMembers: p.members_count,
           deadline: p.deadline,
           status: normalizeStatus(p.status),
         })));

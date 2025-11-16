@@ -68,6 +68,7 @@ class ProjectListItem(BaseModel):
     topic: str
     description1: str
     capacity: int
+    members_count: int
     deadline: date
     status: str
     leader_name: str
