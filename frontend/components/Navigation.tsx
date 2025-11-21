@@ -1,23 +1,35 @@
 'use client';
-
-import { Search, Plus, User, Home, FileText, Star } from 'lucide-react';
+import { User, Home, FileText, Star } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from './ui/button';
 import { useAuth } from './AuthProvider';
 
-interface NavigationProps {
-  currentView: string;
-  onViewChange: (view: string) => void;
-}
-
-export function Navigation({ currentView, onViewChange }: NavigationProps) {
+export function Navigation() {
+  const pathname = usePathname();
+  const router = useRouter();
   const { isLoggedIn, openAuthModal, userName } = useAuth();
 
-  const handleViewChange = (view: string) => {
-    if (!isLoggedIn && (view === 'my-projects' || view === 'applications' || view === 'profile')) {
+  const currentView = (() => {
+    if (pathname?.startsWith('/myprojects')) return 'myprojects';
+    if (pathname?.startsWith('/myapplications')) return 'myapplications';
+    if (pathname?.startsWith('/profile')) return 'profile';
+    return 'projects';
+  })();
+
+  const handleNavigate = (view: string) => {
+    if (!isLoggedIn && (view === 'myprojects' || view === 'myapplications' || view === 'profile')) {
       openAuthModal();
       return;
     }
-    onViewChange(view);
+
+    const routes: Record<string, string> = {
+      projects: '/projects',
+      myprojects: '/myprojects',
+      myapplications: '/myapplications',
+      profile: '/profile',
+    };
+
+    router.push(routes[view] ?? '/projects');
   };
 
   return (
@@ -36,27 +48,25 @@ export function Navigation({ currentView, onViewChange }: NavigationProps) {
             <nav className="hidden md:flex gap-1">
               <Button
                 variant={currentView === 'projects' ? 'default' : 'ghost'}
-                onClick={() => handleViewChange('projects')}
+                onClick={() => handleNavigate('projects')}
                 className="gap-2"
               >
                 <Home className="h-4 w-4" />
-                프로젝트 탐색
+                프로젝트 검색
               </Button>
               <Button
-                variant={currentView === 'my-projects' ? 'default' : 'ghost'}
-                onClick={() => handleViewChange('my-projects')}
+                variant={currentView === 'myprojects' ? 'default' : 'ghost'}
+                onClick={() => handleNavigate('myprojects')}
                 className="gap-2"
               >
-                <FileText className="h-4 w-4" />
                 내 프로젝트
               </Button>
               <Button
-                variant={currentView === 'applications' ? 'default' : 'ghost'}
-                onClick={() => handleViewChange('applications')}
+                variant={currentView === 'myapplications' ? 'default' : 'ghost'}
+                onClick={() => handleNavigate('myapplications')}
                 className="gap-2"
               >
-                <Star className="h-4 w-4" />
-                내 지원현황
+                지원 현황
               </Button>
             </nav>
           </div>
@@ -64,7 +74,7 @@ export function Navigation({ currentView, onViewChange }: NavigationProps) {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              onClick={() => handleViewChange('profile')}
+              onClick={() => handleNavigate('profile')}
               className="gap-2"
             >
               <User className="h-4 w-4" />
@@ -79,16 +89,16 @@ export function Navigation({ currentView, onViewChange }: NavigationProps) {
         <nav className="flex items-center justify-around px-2 py-2">
           <Button
             variant={currentView === 'projects' ? 'default' : 'ghost'}
-            onClick={() => handleViewChange('projects')}
+            onClick={() => handleNavigate('projects')}
             className="flex-1 gap-1 h-12 flex-col"
             size="sm"
           >
             <Home className="h-4 w-4" />
-            <span className="text-xs">탐색</span>
+            <span className="text-xs">검색</span>
           </Button>
           <Button
-            variant={currentView === 'my-projects' ? 'default' : 'ghost'}
-            onClick={() => handleViewChange('my-projects')}
+            variant={currentView === 'myprojects' ? 'default' : 'ghost'}
+            onClick={() => handleNavigate('myprojects')}
             className="flex-1 gap-1 h-12 flex-col"
             size="sm"
           >
@@ -96,13 +106,13 @@ export function Navigation({ currentView, onViewChange }: NavigationProps) {
             <span className="text-xs">내 프로젝트</span>
           </Button>
           <Button
-            variant={currentView === 'applications' ? 'default' : 'ghost'}
-            onClick={() => handleViewChange('applications')}
+            variant={currentView === 'myapplications' ? 'default' : 'ghost'}
+            onClick={() => handleNavigate('myapplications')}
             className="flex-1 gap-1 h-12 flex-col"
             size="sm"
           >
             <Star className="h-4 w-4" />
-            <span className="text-xs">지원현황</span>
+            <span className="text-xs">지원 현황</span>
           </Button>
         </nav>
       </div>
