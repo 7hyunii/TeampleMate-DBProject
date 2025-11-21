@@ -1,6 +1,6 @@
 'use client';
-import { MyApplications } from '@/components/MyApplications';
-import { useAuth } from '@/components/AuthProvider';
+import { MyApplications } from '@/components/applications/MyApplications';
+import { useAuth } from '@/components/auth/AuthProvider';
 export default function ApplicationsPage() {
   const { userId } = useAuth();
 

@@ -1,8 +1,6 @@
 'use client';
-
 import { useRouter } from 'next/navigation';
-
-import { ProjectList } from '@/components/ProjectList';
+import { ProjectList } from '@/components/projects/ProjectList';
 
 export default function ProjectsPage() {
   const router = useRouter();

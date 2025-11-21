@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
 import '../styles/globals.css';
-import { AuthProvider } from '../components/AuthProvider';
-import { Navigation } from '@/components/Navigation';
-import { Footer } from '@/components/Footer';
+import { AuthProvider } from '../components/auth/AuthProvider';
+import { Navigation } from '@/components/layout/Navigation';
+import { Footer } from '@/components/layout/Footer';
 
 export const metadata: Metadata = {
   title: 'Teample Mate',

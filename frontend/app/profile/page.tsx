@@ -1,7 +1,7 @@
 'use client';
 import { useRouter } from 'next/navigation';
-import { ProfileManagement } from '@/components/ProfileManagement';
-import { useAuth } from '@/components/AuthProvider';
+import { ProfileManagement } from '@/components/profile/ProfileManagement';
+import { useAuth } from '@/components/auth/AuthProvider';
 
 export default function ProfilePage() {
   const router = useRouter();
