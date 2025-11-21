@@ -162,3 +162,9 @@ class ProjectStatusUpdateRequest(BaseModel):
 
 class ProjectDeleteRequest(BaseModel):
     leader_id: str
+
+class ReviewCreateRequest(BaseModel):
+    reviewer_id: str
+    reviewee_id: str
+    score: int
+    comment: str

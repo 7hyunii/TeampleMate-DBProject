@@ -87,6 +87,7 @@ export default function Home() {
             onBack={handleBack}
             currentUserId={userId}
             onManageApplicants={handleManageApplicants}
+            onReviewTeam={handleReviewTeam}
           />
         )}
         {currentView === 'create-project' && (

@@ -9,7 +9,8 @@ from schemas.schemas import (
     MyProjectListItem,
     MyProjectListResponse,
     ProjectStatusUpdateRequest,
-    ProjectDeleteRequest
+    ProjectDeleteRequest,
+    ReviewCreateRequest,
 )
 from sqlalchemy.orm import Session
 from api.deps import get_db
@@ -20,6 +21,7 @@ from crud.crud_projects import (
     get_my_projects,
     update_project_status,
     delete_project,
+    create_peer_review,
 )
 
 router = APIRouter(prefix="/projects", tags=["projects"])
@@ -106,5 +108,16 @@ def delete_project_endpoint(project_id: int, req: ProjectDeleteRequest, db: Sess
         return MessageResponse(msg="프로젝트가 삭제되었습니다.")
     except PermissionError as e:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.post("/{project_id}/reviews", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
+def create_project_review(project_id: int, req: ReviewCreateRequest, db: Session = Depends(get_db)) -> MessageResponse:
+    """
+    프로젝트 리뷰 작성
+    """
+    try:
+        create_peer_review(db, project_id, req.reviewer_id, req.reviewee_id, req.score, req.comment)
+        return MessageResponse(msg="프로젝트 리뷰가 성공적으로 작성되었습니다.")
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

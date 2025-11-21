@@ -386,3 +386,33 @@ def delete_project(db: Session, project_id: int, leader_id: str) -> bool:
         conn.close()
 
     return True
+
+def create_peer_review(db: Session, project_id: int, reviewer_id: str, reviewee_id: str, score: int, comment: str) -> None:
+    """
+    동료 리뷰 생성
+    """
+    # 검증: 프로젝트 존재 및 상태 확인 (완료된 프로젝트에서만 리뷰 가능)
+    proj_res = db.execute(text("SELECT status FROM Projects WHERE project_id = :project_id"), {"project_id": project_id})
+    proj_row = proj_res.fetchone()
+    if not proj_row:
+        raise ValueError("해당 프로젝트를 찾을 수 없습니다.")
+    proj_status = proj_row[0]
+    if proj_status != 'Completed':
+        raise ValueError("프로젝트가 완료된 후에만 리뷰를 작성할 수 있습니다.")
+
+    # 리뷰 추가
+    db.execute(text(
+        """
+        INSERT INTO Peer_Reviews (project_id, reviewer_id, reviewee_id, score, comment)
+        VALUES (:project_id, :reviewer_id, :reviewee_id, :score, :comment)
+        """
+    ),
+    {
+        "project_id": project_id,
+        "reviewer_id": reviewer_id,
+        "reviewee_id": reviewee_id,
+        "score": score,
+        "comment": comment,
+    })
+
+    db.execute(text("COMMIT"))
