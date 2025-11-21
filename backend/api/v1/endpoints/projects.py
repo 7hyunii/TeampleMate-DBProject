@@ -11,6 +11,7 @@ from schemas.schemas import (
     ProjectStatusUpdateRequest,
     ProjectDeleteRequest,
     ReviewCreateRequest,
+    ReviewStatusResponse,
 )
 from sqlalchemy.orm import Session
 from api.deps import get_db
@@ -22,6 +23,7 @@ from crud.crud_projects import (
     update_project_status,
     delete_project,
     create_peer_review,
+    get_review_completion_status,
 )
 
 router = APIRouter(prefix="/projects", tags=["projects"])
@@ -119,5 +121,16 @@ def create_project_review(project_id: int, req: ReviewCreateRequest, db: Session
     try:
         create_peer_review(db, project_id, req.reviewer_id, req.reviewee_id, req.score, req.comment)
         return MessageResponse(msg="프로젝트 리뷰가 성공적으로 작성되었습니다.")
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    
+@router.get("/{project_id}/reviews/status", response_model=ReviewStatusResponse, status_code=status.HTTP_200_OK)
+def get_review_status(project_id: int, reviewer_id: str, db: Session = Depends(get_db)) -> dict:
+    """
+    프로젝트 리뷰 작성 상태 조회
+    """
+    try:
+        status = get_review_completion_status(db, project_id, reviewer_id)
+        return status
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

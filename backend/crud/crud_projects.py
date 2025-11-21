@@ -399,6 +399,13 @@ def create_peer_review(db: Session, project_id: int, reviewer_id: str, reviewee_
     proj_status = proj_row[0]
     if proj_status != 'Completed':
         raise ValueError("프로젝트가 완료된 후에만 리뷰를 작성할 수 있습니다.")
+    
+    # 이미 작성했는지 검사
+    dup_res = db.execute(text(
+        "SELECT 1 FROM Peer_Reviews WHERE project_id = :project_id AND reviewer_id = :reviewer_id AND reviewee_id = :reviewee_id LIMIT 1"
+    ), {"project_id": project_id, "reviewer_id": reviewer_id, "reviewee_id": reviewee_id}).fetchone()
+    if dup_res:
+        raise ValueError("이미 작성하셨습니다.")
 
     # 리뷰 추가
     db.execute(text(
@@ -416,3 +423,78 @@ def create_peer_review(db: Session, project_id: int, reviewer_id: str, reviewee_
     })
 
     db.execute(text("COMMIT"))
+
+def get_review_completion_status(db: Session, project_id: int, reviewer_id: str) -> dict:
+    """
+    특정 프로젝트에 대한 리뷰 작성 상태 조회
+    """
+    # 프로젝트 존재 확인 및 상태(완료 여부) 조회
+    proj_res = db.execute(text("SELECT status FROM Projects WHERE project_id = :project_id"), {"project_id": project_id})
+    proj_row = proj_res.fetchone()
+    if not proj_row:
+        raise ValueError("해당 프로젝트를 찾을 수 없습니다.")
+    proj_status = proj_row[0]
+
+    # 프로젝트에 속한 멤버(수락된 지원자 + 리더) 목록 조회
+    members_res = db.execute(text(
+        """
+        SELECT s.uid, s.name, CASE WHEN s.uid = p.leader_id THEN true ELSE false END AS is_leader
+        FROM Students s
+        JOIN (
+          SELECT applicant_id AS uid, project_id FROM Applications WHERE project_id = :project_id AND status = 'Accepted'
+          UNION ALL
+          SELECT leader_id AS uid, project_id FROM Projects WHERE project_id = :project_id
+        ) members ON s.uid = members.uid
+        LEFT JOIN Projects p ON p.project_id = :project_id
+        ORDER BY s.name
+        """,
+    ), {"project_id": project_id})
+
+    member_rows = members_res.fetchall()
+    # 서버 단에서 리뷰어 본인을 제외해서 처리: 이후 로직 단순화
+    members = []
+    for r in member_rows:
+        mapping = r._mapping
+        uid = mapping.get("uid")
+        if uid == reviewer_id:
+            continue
+        members.append({
+            "uid": uid,
+            "name": mapping.get("name"),
+            "is_leader": bool(mapping.get("is_leader")),
+        })
+
+    # 이미 작성한 대상 조회
+    reviews_res = db.execute(text(
+        "SELECT reviewee_id FROM Peer_Reviews WHERE project_id = :project_id AND reviewer_id = :reviewer_id"
+    ), {"project_id": project_id, "reviewer_id": reviewer_id})
+    reviewed_rows = reviews_res.fetchall()
+    reviewed_set = {r[0] for r in reviewed_rows}
+
+    completed = []
+    remaining = []
+    members_with_status = []
+    for m in members:
+        uid = m["uid"]
+        is_reviewed = uid in reviewed_set
+        members_with_status.append({
+            "uid": uid,
+            "name": m.get("name"),
+            "is_leader": bool(m.get("is_leader")),
+            "reviewed": is_reviewed,
+        })
+        if is_reviewed:
+            completed.append(uid)
+        else:
+            remaining.append(uid)
+
+    can_review = proj_status == 'Completed' and len(remaining) > 0
+
+    return {
+        "project_id": project_id,
+        "reviewer_id": reviewer_id,
+        "members": members_with_status,
+        "completed": completed,
+        "remaining": remaining,
+        "can_review": can_review,
+    }

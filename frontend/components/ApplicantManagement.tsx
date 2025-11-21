@@ -206,13 +206,8 @@ export function ApplicantManagement({ projectId, applicantId, currentUserId, onB
         <div className="flex-1">
           <div className="flex items-start justify-between mb-3">
             <div>
-              <h3 className="mb-1">{applicant.name}</h3>
+              <h3 className="mb-1 font-medium">{applicant.name}</h3>
               <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span>{applicant.avgRating ? applicant.avgRating.toFixed(1) : '—'}</span>
-                </div>
-                <span>·</span>
                 <span>평가 {applicant.reviewCount ?? 0}건</span>
                 <span>·</span>
                 <span>{applicant.appliedDate}</span>

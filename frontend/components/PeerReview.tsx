@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Star, Send } from 'lucide-react';
+import { ArrowLeft, Star } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import { Textarea } from './ui/textarea';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Badge } from './ui/badge';
 import { useAuth } from './AuthProvider';
+import { SKILL_DISPLAY_MAP } from '../constants/skills';
 
 interface PeerReviewProps {
   projectId: string;
@@ -34,7 +35,14 @@ export function PeerReview({ projectId, onBack }: PeerReviewProps) {
   const [reviews, setReviews] = useState<Record<string, { score: number; comment: string }>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  
+  const [submittingMap, setSubmittingMap] = useState<Record<string, boolean>>({});
+  const [submittedMap, setSubmittedMap] = useState<Record<string, boolean>>({});
+
+  function displaySkill(skill: string): string {
+    const key = (skill || '').trim().toLowerCase();
+    return SKILL_DISPLAY_MAP[key] || (skill ? skill.charAt(0).toUpperCase() + skill.slice(1) : '');
+  }
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -61,6 +69,32 @@ export function PeerReview({ projectId, onBack }: PeerReviewProps) {
           leaderId: data.leader_id,
           members,
         });
+        // 리뷰 제출 상태 초기화: 서버에 어떤 멤버를 이미 리뷰했는지 요청
+        try {
+          if (userId) {
+            const statusRes = await fetch(
+              `http://localhost:8000/projects/${projectId}/reviews/status?reviewer_id=${encodeURIComponent(
+                userId
+              )}`
+            );
+            if (statusRes.ok) {
+              const statusJson = await statusRes.json();
+              // statusJson.completed 또는 members[].reviewed 기반으로 submittedMap 초기화
+              const done: Record<string, boolean> = {};
+              if (Array.isArray(statusJson.completed)) {
+                statusJson.completed.forEach((uid: string) => (done[uid] = true));
+              } else if (Array.isArray(statusJson.members)) {
+                statusJson.members.forEach((m: any) => {
+                  if (m.reviewed) done[m.uid] = true;
+                });
+              }
+              setSubmittedMap(done);
+            }
+          }
+        } catch (e) {
+          // 상태 초기화 실패 시에도 치명적이지 않으므로 에러를 무시
+          console.warn('리뷰 상태를 불러오지 못함', e);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : '프로젝트 정보를 불러오지 못했습니다.');
       } finally {
@@ -69,7 +103,7 @@ export function PeerReview({ projectId, onBack }: PeerReviewProps) {
     };
 
     fetchProject();
-  }, [projectId]);
+  }, [projectId, userId]);
 
   const membersToReview = project?.members.filter((m) => m.id !== userId) || [];
 
@@ -87,47 +121,48 @@ export function PeerReview({ projectId, onBack }: PeerReviewProps) {
     }));
   };
 
-  const handleSubmit = async () => {
-    if (!project || membersToReview.length === 0) return;
+  const submitForMember = async (memberId: string) => {
+    if (!project) return;
     if (!userId) {
       alert('로그인 후 이용해 주세요.');
       return;
     }
+    const score = reviews[memberId]?.score || 0;
+    const comment = (reviews[memberId]?.comment || '').trim();
+    if (score <= 0 || !comment) {
+      alert('평점과 한 줄 코멘트를 입력해주세요.');
+      return;
+    }
 
-    setSubmitting(true);
+    setSubmittingMap((s) => ({ ...s, [memberId]: true }));
     try {
-      await Promise.all(
-        membersToReview.map(async (member) => {
-          const payload = {
-            reviewer_id: userId,
-            reviewee_id: member.id,
-            score: reviews[member.id]?.score,
-            comment: (reviews[member.id]?.comment || '').trim(),
-          };
+      const payload = {
+        reviewer_id: userId,
+        reviewee_id: memberId,
+        score,
+        comment,
+      };
 
-          const res = await fetch(`http://localhost:8000/projects/${projectId}/reviews`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
-          });
-          if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            throw new Error(data.detail || `리뷰 작성에 실패했습니다: ${member.name}`);
-          }
-        })
-      );
-      alert('리뷰가 제출되었습니다.');
-      onBack();
+      const res = await fetch(`http://localhost:8000/projects/${projectId}/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.detail || `리뷰 작성에 실패했습니다.`);
+      }
+
+      setSubmittedMap((s) => ({ ...s, [memberId]: true }));
+      alert('해당 팀원 리뷰가 제출되었습니다.');
     } catch (err) {
       alert(err instanceof Error ? err.message : '프로젝트 리뷰 저장 중 오류가 발생했습니다.');
     } finally {
-      setSubmitting(false);
+      setSubmittingMap((s) => ({ ...s, [memberId]: false }));
     }
   };
 
-  const allReviewsComplete =
-    membersToReview.length > 0 &&
-    membersToReview.every((member) => reviews[member.id]?.score > 0 && reviews[member.id]?.comment?.trim());
+  
 
   if (loading) {
     return (
@@ -188,7 +223,7 @@ export function PeerReview({ projectId, onBack }: PeerReviewProps) {
 
         {membersToReview.map((member) => (
           <Card key={member.id} className="p-6 shadow-lg bg-gradient-to-br from-white to-slate-50/30">
-            <div className="flex items-start gap-4 mb-6">
+            <div className="flex items-start gap-4 mb-1">
               <Avatar className="h-12 w-12 ring-2 ring-indigo-100 ring-offset-2">
                 <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold">
                   {member.name[0]}
@@ -206,59 +241,87 @@ export function PeerReview({ projectId, onBack }: PeerReviewProps) {
                 <div className="flex gap-1.5">
                   {member.skills.map((skill, idx) => (
                     <Badge key={idx} variant="outline" className="text-xs bg-slate-50">
-                      {skill}
+                      {displaySkill(skill)}
                     </Badge>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent mb-6" />
+            <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+            {submittedMap[member.id] ? (
+              <div className="py-6 flex items-center">
+                <Badge variant="outline" className="text-sm">
+                  이미 작성하셨습니다.
+                </Badge>
+              </div>
+            ) : (
+              <div className="space-y-5">
+                <div>
+                  <label className="text-sm mb-3 block font-semibold text-slate-700">평점 *</label>
+                  <div className="flex flex-wrap gap-2 sm:gap-3 items-center p-4 bg-gradient-to-r from-amber-50/50 to-orange-50/50 rounded-xl border border-amber-100">
+                    {[1, 2, 3, 4, 5].map((score) => (
+                      <button
+                        key={score}
+                        onClick={() => setScore(member.id, score)}
+                        className="transition-transform hover:scale-125 active:scale-110"
+                        type="button"
+                      >
+                        <Star
+                          className={`h-8 sm:h-9 w-8 sm:w-9 transition-all ${
+                            (reviews[member.id]?.score || 0) >= score
+                              ? 'fill-amber-400 text-amber-400 drop-shadow-sm'
+                              : 'text-slate-300 hover:text-slate-400'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                    {reviews[member.id]?.score > 0 && (
+                      <span className="ml-0 sm:ml-3 text-slate-700 font-bold text-base sm:text-lg flex items-center bg-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg shadow-sm">
+                        {reviews[member.id].score}.0
+                      </span>
+                    )}
+                  </div>
+                </div>
 
-            <div className="space-y-5">
-              <div>
-                <label className="text-sm mb-3 block font-semibold text-slate-700">평점 *</label>
-                <div className="flex flex-wrap gap-2 sm:gap-3 items-center p-4 bg-gradient-to-r from-amber-50/50 to-orange-50/50 rounded-xl border border-amber-100">
-                  {[1, 2, 3, 4, 5].map((score) => (
-                    <button
-                      key={score}
-                      onClick={() => setScore(member.id, score)}
-                      className="transition-transform hover:scale-125 active:scale-110"
-                      type="button"
-                    >
-                      <Star
-                        className={`h-8 sm:h-9 w-8 sm:w-9 transition-all ${
-                          (reviews[member.id]?.score || 0) >= score
-                            ? 'fill-amber-400 text-amber-400 drop-shadow-sm'
-                            : 'text-slate-300 hover:text-slate-400'
-                        }`}
-                      />
-                    </button>
-                  ))}
-                  {reviews[member.id]?.score > 0 && (
-                    <span className="ml-0 sm:ml-3 text-slate-700 font-bold text-base sm:text-lg flex items-center bg-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg shadow-sm">
-                      {reviews[member.id].score}.0
-                    </span>
+                <div>
+                  <label className="text-sm mb-2 block font-semibold text-slate-700">한 줄 코멘트 *</label>
+                  <Textarea
+                    placeholder="팀원의 기여도와 협업 태도를 간단히 남겨주세요."
+                    value={reviews[member.id]?.comment || ''}
+                    onChange={(e) => setComment(member.id, e.target.value)}
+                    rows={4}
+                    className="bg-white border-slate-200"
+                  />
+                  {reviews[member.id]?.comment && (
+                    <p className="text-xs text-slate-500 mt-2">
+                      {reviews[member.id].comment.length} / 500자
+                    </p>
                   )}
                 </div>
-              </div>
 
-              <div>
-                <label className="text-sm mb-2 block font-semibold text-slate-700">한 줄 코멘트 *</label>
-                <Textarea
-                  placeholder="팀원의 기여도와 협업 태도를 간단히 남겨주세요."
-                  value={reviews[member.id]?.comment || ''}
-                  onChange={(e) => setComment(member.id, e.target.value)}
-                  rows={4}
-                  className="bg-white border-slate-200"
-                />
-                {reviews[member.id]?.comment && (
-                  <p className="text-xs text-slate-500 mt-2">
-                    {reviews[member.id].comment.length} / 500자
-                  </p>
-                )}
+                <div className="mt-4 flex items-center gap-3">
+                  <>
+                    <Button
+                      onClick={() => submitForMember(member.id)}
+                      disabled={
+                        submittingMap[member.id] ||
+                        !(reviews[member.id]?.score > 0 && (reviews[member.id]?.comment || '').trim())
+                      }
+                      className="gap-2"
+                    >
+                      {submittingMap[member.id] ? '제출 중...' : '제출'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setReviews((prev) => ({ ...prev, [member.id]: { score: 0, comment: '' } }))}
+                    >
+                      입력 초기화
+                    </Button>
+                  </>
+                </div>
               </div>
-            </div>
+            )}
           </Card>
         ))}
       </div>
@@ -277,19 +340,6 @@ export function PeerReview({ projectId, onBack }: PeerReviewProps) {
         </p>
       </Card>
 
-      <div className="flex gap-3">
-        <Button variant="outline" onClick={onBack} className="flex-1">
-          취소하기
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          disabled={!allReviewsComplete || submitting}
-          className="flex-1 gap-2"
-        >
-          <Send className="h-4 w-4" />
-          리뷰 제출
-        </Button>
-      </div>
     </div>
   );
 }

@@ -168,3 +168,17 @@ class ReviewCreateRequest(BaseModel):
     reviewee_id: str
     score: int
     comment: str
+
+class ReviewStatusMember(BaseModel):
+    uid: str
+    name: str
+    is_leader: bool = False
+    reviewed: bool = False
+
+class ReviewStatusResponse(BaseModel):
+    project_id: int
+    reviewer_id: str
+    members: list[ReviewStatusMember] = []
+    completed: list[str] = []
+    remaining: list[str] = []
+    can_review: bool = False

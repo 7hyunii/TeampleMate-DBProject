@@ -35,6 +35,7 @@ interface ProjectDetailProps {
   onBack: () => void;
   currentUserId: string;
   onManageApplicants?: (projectId: string) => void;
+  onReviewTeam?: (projectId: string) => void;
 }
 
 function SkeletonDetail() {
@@ -82,6 +83,7 @@ export function ProjectDetail({
   onBack,
   currentUserId,
   onManageApplicants,
+  onReviewTeam,
 }: ProjectDetailProps) {
   const [motivation, setMotivation] = useState("");
   const [applied, setApplied] = useState(false);
@@ -150,6 +152,9 @@ export function ProjectDetail({
   })();
 
   const isLeader = ProjectDetails.leaderId === currentUserId;
+  const isMember = ProjectDetails.members?.some(
+    (m: any) => m?.uid === currentUserId || m?.id === currentUserId,
+  );
   const daysUntilDeadline = Math.ceil(
     (new Date(ProjectDetails.deadline).getTime() - new Date().getTime()) /
       (1000 * 60 * 60 * 24)
@@ -531,6 +536,15 @@ export function ProjectDetail({
               )}
               
             </div>
+          )}
+
+          {(ProjectDetails.status === 'Completed' && (isLeader || isMember)) && onReviewTeam && (
+            <Button
+              onClick={() => onReviewTeam(projectId)}
+              className="w-full mt-2 bg-yellow-600 hover:bg-yellow-700 text-white shadow-md"
+            >
+              팀원 평가하기
+            </Button>
           )}
         </div>
       </div>

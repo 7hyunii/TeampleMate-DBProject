@@ -1,10 +1,7 @@
 'use client';
-
-import { Calendar, Users, Clock } from "lucide-react";
-
+import { Users, Clock } from "lucide-react";
 import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { Button } from "./ui/button";
 import { useAuth } from "./AuthProvider";
 import { SKILL_DISPLAY_MAP } from "../constants/skills";
 
@@ -113,7 +110,7 @@ export function ProjectCard({
               >
                 {daysUntilDeadline > 0
                   ? `D-${daysUntilDeadline}`
-                  : "마감"}
+                  : "마감일"}
               </span>
             </div>
           </div>
