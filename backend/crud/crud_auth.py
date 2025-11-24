@@ -28,5 +28,5 @@ def login_student(db: Session, uid: str, password: str, verify_password_func) ->
     hashed_pw = row[0]
     if not verify_password_func(password, hashed_pw):
         return None
-    # row: (hashed_password, uid, name, email, profile_text, website_link)
-    return (row[1], row[2], row[3], row[4] or "", row[5] or "")
+
+    return (row[1], row[2], row[3] or "", row[4] or "", row[5] or "")

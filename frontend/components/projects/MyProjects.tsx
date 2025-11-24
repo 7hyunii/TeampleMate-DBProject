@@ -45,7 +45,7 @@ type ProjectItem = {
   needsReview?: boolean;
 };
 
-export function MyProjects({ onCreateProject, onManageApplicants, onReviewTeam, onViewProject }: MyProjectsProps) {
+export function MyProjects({ onCreateProject, onReviewTeam, onViewProject }: MyProjectsProps) {
   const { userId } = useAuth();
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -112,7 +112,7 @@ export function MyProjects({ onCreateProject, onManageApplicants, onReviewTeam, 
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-slate-900 leading-tight">{project.title}</h3>
+              <h3 className="font-semibold text-slate-900 leading-tight truncate">{project.title}</h3>
               {project.leader_id && project.leader_id === userId && (
                 <Badge variant="outline" className="text-xs bg-indigo-50 text-indigo-700 border-indigo-200">리더</Badge>
               )}

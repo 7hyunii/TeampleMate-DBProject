@@ -1,20 +1,24 @@
--- 테이블 생성 전, 기존 테이블이 있으면 삭제
-DROP TABLE IF EXISTS Peer_Reviews;
-DROP TABLE IF EXISTS Applications;
-DROP TABLE IF EXISTS Project_Required_Skills;
-DROP TABLE IF EXISTS Projects;
-DROP TABLE IF EXISTS Student_Skills;
-DROP TABLE IF EXISTS Skills;
-DROP TABLE IF EXISTS Students;
+DROP VIEW IF EXISTS ProjectApplicantsView;
+DROP VIEW IF EXISTS RecruitingProjectsView;
+DROP VIEW IF EXISTS InProgressProjectsView;
+DROP VIEW IF EXISTS CompletedProjectsView;
+
+DROP TABLE IF EXISTS Peer_Reviews CASCADE;
+DROP TABLE IF EXISTS Applications CASCADE;
+DROP TABLE IF EXISTS Project_Required_Skills CASCADE;
+DROP TABLE IF EXISTS Projects CASCADE;
+DROP TABLE IF EXISTS Student_Skills CASCADE;
+DROP TABLE IF EXISTS Skills CASCADE;
+DROP TABLE IF EXISTS Students CASCADE;
+-- 삭제 
 
 CREATE TABLE Students (
-    uid VARCHAR(50) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    hashed_password VARCHAR(255) NOT NULL,
-    email TEXT,
-    profile_text TEXT,
-    website_link TEXT,
-    avg_rating DECIMAL(3, 2) DEFAULT 0.0
+  uid VARCHAR(50) PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  hashed_password VARCHAR(255) NOT NULL,
+  email TEXT DEFAULT '' NOT NULL,
+  profile_text TEXT DEFAULT '' NOT NULL,
+  website_link TEXT DEFAULT '' NOT NULL
 );
 
 CREATE TABLE Skills (
@@ -128,4 +132,3 @@ SELECT
 FROM Applications a
 JOIN Projects p ON a.project_id = p.project_id
 JOIN Students s ON a.applicant_id = s.uid;
-

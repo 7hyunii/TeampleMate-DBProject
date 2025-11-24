@@ -65,7 +65,19 @@ DB_Termproject/
 ├── frontend/                        # Next.js 프론트엔드 클라이언트
 │   ├── app/                         # App Router (페이지 라우팅)
 │   │   ├── layout.tsx
-│   │   └── page.tsx                 # 메인 페이지
+│   │   ├── page.tsx                 # 메인 페이지
+│   │   ├── myapplications/          # 내 지원 현황 페이지
+│   │   │   └── page.tsx
+│   │   ├── myprojects/              # 내 프로젝트 관리 페이지
+│   │   │   └── page.tsx
+│   │   ├── profile/                 # 프로필 관리 페이지
+│   │   │   └── page.tsx
+│   │   └── projects/                # 프로젝트 관련 페이지
+│   │       ├── page.tsx             # 프로젝트 목록
+│   │       ├── create/              # 프로젝트 생성
+│   │       │   └── page.tsx
+│   │       └── [id]/                # 프로젝트 상세
+│   │           └── page.tsx
 │   ├── components/                  # UI 컴포넌트
 │   │   ├── auth/                    # 인증 관련
 │   │   │   ├── AuthModal.tsx        # 로그인/회원가입 모달
@@ -157,7 +169,7 @@ DB_Termproject/
 
 주요 테이블 구조는 다음과 같습니다.
 
-| | | 
+| 테이블 | 정보 | 
 |---|---|
 | **Students** | 사용자(학생) 정보 |
 | **Skills** | 보유 가능한 기술 스택 목록 |
@@ -167,5 +179,5 @@ DB_Termproject/
 | **Applications** | 프로젝트 지원 현황 | 
 | **Peer_Reviews** | 팀원 상호 평가 | 
 
-자세한 스키마는 backend\db\sql\CreateTable.sql 참조
+자세한 스키마는 ```backend\db\sql\CreateTable.sql``` 참조
 
