@@ -18,41 +18,40 @@
 
 ### 1. 회원가입 및 로그인
 아이디와 비밀번호를 이용한 간편한 회원가입 및 로그인 기능을 제공합니다.
-![회원가입 및 로그인](image/Screenshot_auth.png)
+<img src="image/Screenshot_auth.png" alt="회원가입 및 로그인" width="80%" />
 
 ### 2. 프로필 관리
 자신의 기술 스택, 자기소개 등 프로필 정보를 등록하고 수정할 수 있습니다.
-![프로필 관리](image/Screenshot_profile.png)
+<img src="image/Screenshot_profile.png" alt="프로필 관리" width="80%" />
 
 ### 3. 프로젝트 목록 조회
 모집 중인 프로젝트를 카드 형태로 직관적으로 확인할 수 있습니다.<br> 키워드 검색, 기술 스택 별 필터링, 상태별(모집중/진행중/완료) 필터링 및 마감일/모집인원 순 정렬 기능을 제공합니다. <br> 각 프로젝트 카드를 클릭하여 상세 페이지로 이동할 수 있습니다. 
-![프로젝트 목록](image/Screenshot_projectlist.png)
+<img src="image/Screenshot_projectlist.png" alt="프로젝트 목록" width="80%" />
 
 ### 4. 프로젝트 생성
 새로운 프로젝트를 개설하며 필요한 기술 스택, 모집 인원, 마감일 등 상세 조건을 설정할 수 있습니다.
-![프로젝트 생성](image/Screenshot_createproject.png)
+<img src="image/Screenshot_createproject.png" alt="프로젝트 생성" width="80%" />
 
 ### 5. 프로젝트 상세 정보
 프로젝트의 제목, 설명, 요구 기술 스택, 현재 팀원 등 상세 정보를 한눈에 확인할 수 있습니다.
 
-- 프로젝트 리더: 프로젝트 상태(지원마감/진행중/완료)를 변경하고, 지원자 관리 페이지로 이동해 지원자들을 
-검토·관리할 수 있습니다.
-   ![프로젝트 상세](image/Screenshot_projectdetail.png)
+- 프로젝트 리더: 프로젝트 상태(지원마감/진행중/완료)를 변경하고, 지원자 관리 페이지로 이동할 수 있습니다.
+   <img src="image/Screenshot_projectdetail.png" alt="프로젝트 상세" width="80%" />
 
 - 일반 사용자: 지원 동기를 작성해 프로젝트에 지원할 수 있습니다.
-   ![프로젝트 지원](image/Screenshot_projectdetail3.png)
+   <img src="image/Screenshot_projectdetail3.png" alt="프로젝트 지원" width="80%" />
 
 ### 6. 내 프로젝트 관리
 생성했거나 참여 중인 프로젝트를 한곳에서 관리할 수 있습니다.<br> 각 프로젝트 카드를 클릭하여 상세 페이지로 이동할 수 있습니다.
-![내 프로젝트](image/Screenshot_myproject.png)
+<img src="image/Screenshot_myproject.png" alt="내 프로젝트" width="80%" />
 
 ### 7. 지원자 관리 (리더 전용)
 프로젝트 리더는 지원자의 프로필, 기술 스택, 과거 동료 평가 등을 검토하여 팀원 합류를 승인하거나 거절할 수 있습니다.
-![지원자 관리](image/Screenshot_applicantmanagement.png)
+<img src="image/Screenshot_applicantmanagement.png" alt="지원자 관리" width="80%" />
 
 ### 8. 내 지원 현황
 지원한 프로젝트의 목록과 상태(대기중/승인됨/거절됨)를 실시간으로 확인할 수 있습니다.
-![내 지원 현황](image/Screenshot_myapplication.png)
+<img src="image/Screenshot_myapplication.png" alt="내 지원 현황" width="80%" />
 
 
 ## 기술 스택
@@ -61,17 +60,21 @@
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=pydantic&logoColor=white)](https://pydantic-docs.helpmanual.io/)
+[![Swagger](https://img.shields.io/badge/Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)](https://swagger.io/)<br>
+![python-dotenv](https://img.shields.io/badge/python--dotenv-ECD53F?style=for-the-badge&logo=dotenv&logoColor=white) 
+![bcrypt](https://img.shields.io/badge/bcrypt-1E3A8A?style=for-the-badge&logo=bcrypt&logoColor=white)
+[![Uvicorn](https://img.shields.io/badge/Uvicorn-4AB8FF?style=for-the-badge&logo=uvicorn&logoColor=white)](https://www.uvicorn.org/)<br>
 [![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
-[![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=pydantic&logoColor=white)](https://pydantic-docs.helpmanual.io/) <br>
-[![Uvicorn](https://img.shields.io/badge/Uvicorn-4AB8FF?style=for-the-badge&logo=uvicorn&logoColor=white)](https://www.uvicorn.org/)
-[![Swagger](https://img.shields.io/badge/Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)](https://swagger.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/) <br>
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)<br>
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
 [![Radix UI](https://img.shields.io/badge/Radix_UI-161618?style=for-the-badge&logo=radix-ui&logoColor=white)](https://www.radix-ui.com/)
 [![Lucide](https://img.shields.io/badge/Lucide-F56565?style=for-the-badge&logo=lucide&logoColor=white)](https://lucide.dev/)
+![ESLint](https://img.shields.io/badge/ESLint-4B3263?style=for-the-badge&logo=eslint&logoColor=white)
 </div>
 
 
@@ -148,7 +151,7 @@ Project/
 
 ## 개발 환경 설정
 
-### 사전 요구 사항 (Prerequisites)
+### 사전 요구 사항
 - **Python** : 3.10 이상
 - **Node.js** : 18.0 이상
 - **PostgreSQL** : 14.0 이상
