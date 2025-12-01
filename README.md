@@ -33,8 +33,14 @@
 ![프로젝트 생성](image/Screenshot_createproject.png)
 
 ### 5. 프로젝트 상세 정보
-프로젝트의 상세 정보를 확인하고, 원하는 프로젝트에 지원할 수 있습니다.
-![프로젝트 상세](image/Screenshot_projectdetail.png)
+프로젝트의 제목, 설명, 요구 기술 스택, 현재 팀원 등 상세 정보를 한눈에 확인할 수 있습니다.
+
+- 프로젝트 리더: 프로젝트 상태(지원마감/진행중/완료)를 변경하고, 지원자 관리 페이지로 이동해 지원자들을 
+검토·관리할 수 있습니다.
+   ![프로젝트 상세](image/Screenshot_projectdetail.png)
+
+- 일반 사용자: 지원 동기를 작성해 프로젝트에 지원할 수 있습니다.
+   ![프로젝트 지원](image/Screenshot_projectdetail3.png)
 
 ### 6. 내 프로젝트 관리
 생성했거나 참여 중인 프로젝트를 한곳에서 관리할 수 있습니다.<br> 각 프로젝트 카드를 클릭하여 상세 페이지로 이동할 수 있습니다.
@@ -51,28 +57,28 @@
 
 ## 기술 스택
 
-### Backend
-- **Framework**: FastAPI
-- **Language**: Python 3.10+
-- **ORM**: SQLAlchemy (Core & ORM)
-- **Data Validation**: Pydantic
-- **Server**: Uvicorn
-- **API Documentation**: Swagger UI (Auto-generated)
+<div align="center">
 
-### Frontend
-- **Framework**: Next.js 15+ (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Components**: Radix UI (shadcn/ui 기반), Lucide React (Icons)
-- **State Management**: React Hooks (useState, useEffect, useContext)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=for-the-badge&logo=sqlalchemy&logoColor=white)](https://www.sqlalchemy.org/)
+[![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=for-the-badge&logo=pydantic&logoColor=white)](https://pydantic-docs.helpmanual.io/)
+[![Uvicorn](https://img.shields.io/badge/Uvicorn-4AB8FF?style=for-the-badge&logo=uvicorn&logoColor=white)](https://www.uvicorn.org/)
+[![Swagger](https://img.shields.io/badge/Swagger-%23Clojure?style=for-the-badge&logo=swagger&logoColor=white)](https://swagger.io/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
-### Database
-- **RDBMS**: PostgreSQL
+[![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Radix UI](https://img.shields.io/badge/Radix_UI-161618?style=for-the-badge&logo=radix-ui&logoColor=white)](https://www.radix-ui.com/)
+[![Lucide](https://img.shields.io/badge/Lucide-F56565?style=for-the-badge&logo=lucide&logoColor=white)](https://lucide.dev/)
+</div>
+
 
 ## 프로젝트 구조
 
 ```
-DB_Termproject/
+Project/
 ├── backend/                         # FastAPI 백엔드 서버
 │   ├── api/
 │   │   ├── deps.py                  # 의존성 주입 (DB 세션 등)
