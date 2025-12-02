@@ -15,41 +15,44 @@
 ## 주요 기능
 
 ### 1. 회원가입 및 로그인
-아이디와 비밀번호를 이용한 간편한 회원가입 및 로그인 기능을 제공합니다.
-<img src="image/Screenshot_auth.png" alt="회원가입 및 로그인" width="80%" />
+- 아이디와 비밀번호를 이용한 간편한 회원가입 및 로그인 기능을 제공합니다.
+<img src="image/Screenshot_auth.png" alt="회원가입 및 로그인" width="100%" />
 
 ### 2. 프로필 관리
-자신의 기술 스택, 자기소개 등 프로필 정보를 등록하고 수정할 수 있습니다.
-<img src="image/Screenshot_profile.png" alt="프로필 관리" width="80%" />
+- 자신의 기술 스택, 자기소개 등 프로필 정보를 등록하고 수정할 수 있습니다.
+<img src="image/Screenshot_profile.png" alt="프로필 관리" width="100%" />
 
 ### 3. 프로젝트 목록 조회
-모집 중인 프로젝트를 카드 형태로 직관적으로 확인할 수 있습니다.<br> 키워드 검색, 기술 스택 별 필터링, 상태별(모집중/진행중/완료) 필터링 및 마감일/모집인원 순 정렬 기능을 제공합니다. <br> 각 프로젝트 카드를 클릭하여 상세 페이지로 이동할 수 있습니다. 
-<img src="image/Screenshot_projectlist.png" alt="프로젝트 목록" width="80%" />
+- 모집 중인 프로젝트를 카드 형태로 직관적으로 확인할 수 있습니다.<br>
+- 키워드 검색, 기술 스택 별 필터링, 상태별(모집중/진행중/완료) 필터링 및 마감일/모집인원 순 정렬 기능을 제공합니다. <br>
+- 각 프로젝트 카드를 클릭하여 상세 페이지로 이동할 수 있습니다. 
+<img src="image/Screenshot_projectlist.png" alt="프로젝트 목록" width="100%" />
 
 ### 4. 프로젝트 생성
-새로운 프로젝트를 개설하며 필요한 기술 스택, 모집 인원, 마감일 등 상세 조건을 설정할 수 있습니다.
-<img src="image/Screenshot_createproject.png" alt="프로젝트 생성" width="80%" />
+- 새로운 프로젝트를 개설하며 필요한 기술 스택, 모집 인원, 마감일 등 상세 조건을 설정할 수 있습니다.
+<img src="image/Screenshot_createproject.png" alt="프로젝트 생성" width="100%" />
 
 ### 5. 프로젝트 상세 정보
-프로젝트의 제목, 설명, 요구 기술 스택, 현재 팀원 등 상세 정보를 한눈에 확인할 수 있습니다.
+- 프로젝트의 제목, 설명, 요구 기술 스택, 현재 팀원 등 상세 정보를 한눈에 확인할 수 있습니다.
 
 - 프로젝트 리더: 프로젝트 상태(지원마감/진행중/완료)를 변경하고, 지원자 관리 페이지로 이동할 수 있습니다.
-   <img src="image/Screenshot_projectdetail.png" alt="프로젝트 상세" width="80%" />
+   <img src="image/Screenshot_projectdetail.png" alt="프로젝트 상세" width="100%" />
 
 - 일반 사용자: 지원 동기를 작성해 프로젝트에 지원할 수 있습니다.
-   <img src="image/Screenshot_projectdetail3.png" alt="프로젝트 지원" width="80%" />
+   <img src="image/Screenshot_projectdetail3.png" alt="프로젝트 지원" width="100%" />
 
 ### 6. 내 프로젝트 관리
-생성했거나 참여 중인 프로젝트를 한곳에서 관리할 수 있습니다.<br> 각 프로젝트 카드를 클릭하여 상세 페이지로 이동할 수 있습니다.
-<img src="image/Screenshot_myproject.png" alt="내 프로젝트" width="80%" />
+- 생성했거나 참여 중인 프로젝트를 한곳에서 관리할 수 있습니다.<br>
+- 각 프로젝트 카드를 클릭하여 상세 페이지로 이동할 수 있습니다.
+<img src="image/Screenshot_myproject.png" alt="내 프로젝트" width="100%" />
 
 ### 7. 지원자 관리 (리더 전용)
-프로젝트 리더는 지원자의 프로필, 기술 스택, 과거 동료 평가 등을 검토하여 팀원 합류를 승인하거나 거절할 수 있습니다.
-<img src="image/Screenshot_applicantmanagement.png" alt="지원자 관리" width="80%" />
+- 프로젝트 리더는 지원자의 프로필, 기술 스택, 과거 동료 평가 등을 검토하여 팀원 합류를 승인하거나 거절할 수 있습니다.
+<img src="image/Screenshot_applicantmanagement.png" alt="지원자 관리" width="100%" />
 
 ### 8. 내 지원 현황
-지원한 프로젝트의 목록과 상태(대기중/승인됨/거절됨)를 실시간으로 확인할 수 있습니다.
-<img src="image/Screenshot_myapplication.png" alt="내 지원 현황" width="80%" />
+- 지원한 프로젝트의 목록과 상태(대기중/승인됨/거절됨)를 실시간으로 확인할 수 있습니다.
+<img src="image/Screenshot_myapplication.png" alt="내 지원 현황" width="100%" />
 
 
 ## 기술 스택
@@ -94,11 +97,13 @@ Project/
 │   │   ├── crud_applications.py
 │   │   └── crud_profile.py
 │   ├── db/                          # 데이터베이스 설정
+│   │   ├── init_db.py               # DB 초기화 스크립트
 │   │   ├── session.py               # DB 연결 세션
 │   │   ├── utils.py
 │   │   └── sql/                     # SQL 스크립트
-│   │       ├── CreateTable.sql      # 테이블/뷰/인덱스 생성 스크립트
 │   │       ├── CreateRoles.sql      # Role 생성 스크립트
+│   │       ├── CreateTable.sql      # 테이블/뷰/인덱스 생성 스크립트
+│   │       ├── TestData.sql         # 테스트용 더미 데이터
 │   │       └── App_roles_and_privileges.sql # 권한 설정 스크립트
 │   ├── schemas/                     # Pydantic 데이터 스키마 (Request/Response)
 │   │   └── schemas.py
