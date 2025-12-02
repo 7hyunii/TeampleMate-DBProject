@@ -9,7 +9,8 @@ INSERT INTO Skills (skill_name) VALUES
 ('c'), ('c++'), ('kotlin'), ('swift'), ('flutter'),             
 ('mysql'), ('postgresql'), ('redis'), ('docker'), ('aws'),      
 ('pytorch'), ('tensorflow'), ('pandas'),                        
-('figma'), ('git'), ('github'), ('notion'), ('jira');           
+('figma'), ('git'), ('github'), ('notion'), ('jira')
+ON CONFLICT (skill_name) DO NOTHING;           
 
 
 -- 4. 학생 (Students) 데이터 
@@ -43,7 +44,8 @@ INSERT INTO Students (uid, name, hashed_password, email, profile_text, website_l
  '$2b$12$4odQoeVEfPIqD.eKTQtGqe/qVnhoFtbXu2S4IQZ1CSJSH.YxQrNMW', 
  'doyoon@univ.ac.kr', 
  '소프트웨어학부 2학년. 열정 가득한 주니어 개발자입니다. C/Java 기초 탄탄합니다. 무엇이든 배우겠습니다!', 
- '');
+ '')
+ON CONFLICT (uid) DO NOTHING;
 
 
 -- 5. 학생 보유 기술 매핑
@@ -62,14 +64,15 @@ INSERT INTO Student_Skills (uid, skill_id) VALUES
 ('student_choi', (SELECT skill_id FROM Skills WHERE skill_name = 'jira')),
 ('student_choi', (SELECT skill_id FROM Skills WHERE skill_name = 'python')),
 ('student_jung', (SELECT skill_id FROM Skills WHERE skill_name = 'java')),
-('student_jung', (SELECT skill_id FROM Skills WHERE skill_name = 'c'));
+('student_jung', (SELECT skill_id FROM Skills WHERE skill_name = 'c'))
+ON CONFLICT (uid, skill_id) DO NOTHING;
 
 
 -- 6. 프로젝트 (Projects) 데이터 - 총 7개
 
 -- [1: Recruiting] 캡스톤 디자인
-INSERT INTO Projects (leader_id, topic, description1, description2, capacity, deadline, status) VALUES
-('student_kim', 'AI 기반 개인 맞춤형 학습 큐레이션 플랫폼', 
+INSERT INTO Projects (project_id, leader_id, topic, description1, description2, capacity, deadline, status) VALUES
+(1, 'student_kim', 'AI 기반 개인 맞춤형 학습 큐레이션 플랫폼', 
  '2025학년도 1학기 캡스톤 디자인 프로젝트 팀원을 모집합니다. (백엔드 리드)', 
  '1. 프로젝트 상세 개요
    - 사용자의 학습 이력(수강 강의, 성적, 관심 분야)을 분석하여 최적의 커리큘럼을 추천하는 웹 서비스입니다.
@@ -88,11 +91,12 @@ INSERT INTO Projects (leader_id, topic, description1, description2, capacity, de
 4. 협업 방식
    - 매주 화요일 오후 7시 대면 회의 (공학관 스터디룸)
    - Notion으로 회의록 관리, Jira로 이슈 및 일정 관리', 
- 4, '2025-12-30', 'Recruiting');
+ 4, '2025-12-30', 'Recruiting')
+ON CONFLICT (project_id) DO NOTHING;
 
 -- [2: In_Progress] 알고리즘 스터디
-INSERT INTO Projects (leader_id, topic, description1, description2, capacity, deadline, status) VALUES
-('student_park', '2025 상반기 공채 대비 알고리즘 및 CS 스터디', 
+INSERT INTO Projects (project_id, leader_id, topic, description1, description2, capacity, deadline, status) VALUES
+(2, 'student_park', '2025 상반기 공채 대비 알고리즘 및 CS 스터디', 
  '매일 1문제 풀이 및 주 1회 모의 면접. 보증금 있습니다.', 
  '1. 스터디 목표
    - 대기업 IT 직군 코딩테스트 통과 (삼성, 카카오, 네이버 기출 중심)
@@ -107,11 +111,12 @@ INSERT INTO Projects (leader_id, topic, description1, description2, capacity, de
    - 문제 미제출: 1회당 3,000원
    - 지각/결석: 1회당 5,000원
    - (모인 벌금은 스터디 종료 후 회식비로 사용)', 
- 6, '2026-01-31', 'In_Progress');
+ 6, '2026-01-31', 'In_Progress')
+ON CONFLICT (project_id) DO NOTHING;
 
 -- [3: Completed] 해커톤 (기존)
-INSERT INTO Projects (leader_id, topic, description1, description2, capacity, deadline, status) VALUES
-('student_choi', '캠퍼스 셔틀버스 실시간 위치 추적 서비스', 
+INSERT INTO Projects (project_id, leader_id, topic, description1, description2, capacity, deadline, status) VALUES
+(3, 'student_choi', '캠퍼스 셔틀버스 실시간 위치 추적 서비스', 
  '교내 해커톤 은상 수상작. 셔틀버스 위치 알림 앱.', 
  '1. 개발 배경 및 목적
    - 교내 셔틀버스 배차 간격이 불규칙하여 학생들이 겪는 불편함을 해소하고자 기획했습니다.
@@ -127,11 +132,12 @@ INSERT INTO Projects (leader_id, topic, description1, description2, capacity, de
    - 교내 소프트웨어 해커톤 은상 수상
    - 실제 베타 테스트 기간 동안 일일 활성 사용자(DAU) 300명 달성
    - 학생처와 협의하여 정식 서비스 도입 논의 중', 
- 4, '2025-11-10', 'Completed');
+ 4, '2025-11-10', 'Completed')
+ON CONFLICT (project_id) DO NOTHING;
 
 -- [4: Recruiting] 핀테크 대시보드 프로젝트
-INSERT INTO Projects (leader_id, topic, description1, description2, capacity, deadline, status) VALUES
-('student_kim', '가상화폐/주식 포트폴리오 관리 대시보드', 
+INSERT INTO Projects (project_id, leader_id, topic, description1, description2, capacity, deadline, status) VALUES
+(4, 'student_kim', '가상화폐/주식 포트폴리오 관리 대시보드', 
  '사이드 프로젝트로 금융 데이터 시각화 웹을 만들어보실 분 구합니다.', 
  '1. 프로젝트 개요
    - 흩어져 있는 나의 투자 자산(주식, 코인)을 한눈에 모아보고 수익률을 시각화하는 대시보드입니다.
@@ -145,11 +151,12 @@ INSERT INTO Projects (leader_id, topic, description1, description2, capacity, de
    - 금융 데이터 처리에 관심이 많으신 분
    - WebSocket을 이용한 실시간 데이터 처리를 경험해보고 싶으신 분
    - 포트폴리오용으로 완성도 있는 프로젝트를 하나 남기고 싶으신 분', 
- 3, '2025-12-30', 'Recruiting');
+ 3, '2025-12-30', 'Recruiting')
+ON CONFLICT (project_id) DO NOTHING;
 
 -- [5: In_Progress] 모바일 헬스케어 앱 (Flutter)
-INSERT INTO Projects (leader_id, topic, description1, description2, capacity, deadline, status) VALUES
-('student_lee', '하루 물 마시기 알림 & 기록 앱 (Flutter)', 
+INSERT INTO Projects (project_id, leader_id, topic, description1, description2, capacity, deadline, status) VALUES
+(5, 'student_lee', '하루 물 마시기 알림 & 기록 앱 (Flutter)', 
  '디자인은 완료되었고, 개발 함께하실 분 찾습니다. (Flutter 입문자 환영)', 
  '1. 앱 소개
    - 사용자의 체중과 활동량을 기반으로 하루 권장 물 섭취량을 계산하고 알림을 보내주는 앱입니다.
@@ -168,11 +175,12 @@ INSERT INTO Projects (leader_id, topic, description1, description2, capacity, de
 4. 담당 역할
    - UI 퍼블리싱 및 애니메이션 구현
    - Firebase 연동 및 데이터 처리', 
- 2, '2026-01-10', 'In_Progress');
+ 2, '2026-01-10', 'In_Progress')
+ON CONFLICT (project_id) DO NOTHING;
 
 -- [6: Completed] 빅데이터 분석 공모전
-INSERT INTO Projects (leader_id, topic, description1, description2, capacity, deadline, status) VALUES
-('student_park', '서울시 공공데이터 활용 분석 공모전', 
+INSERT INTO Projects (project_id, leader_id, topic, description1, description2, capacity, deadline, status) VALUES
+(6, 'student_park', '서울시 공공데이터 활용 분석 공모전', 
  '교통 데이터를 활용한 상권 분석 보고서 작성 및 시각화.', 
  '1. 공모전 주제
    - 서울시 지하철/버스 승하차 인원 데이터와 골목상권 매출 데이터를 융합하여 상관관계를 분석했습니다.
@@ -187,11 +195,12 @@ INSERT INTO Projects (leader_id, topic, description1, description2, capacity, de
 3. 목표
 	- 대용량 데이터(약 100만 건) 처리 경험을 쌓을 수 있기를 바랍니다.
 	- 입상을 통해 개인 포트폴리오를 채울 수 있기를 바랍니다.', 
- 3, '2025-10-15', 'Completed');
+ 3, '2025-10-15', 'Completed')
+ON CONFLICT (project_id) DO NOTHING;
 
 -- [7: Completed] 동아리 홈페이지 리뉴얼
-INSERT INTO Projects (leader_id, topic, description1, description2, capacity, deadline, status) VALUES
-('student_lee', '멋쟁이 사자처럼 교내 동아리 메인 페이지 리뉴얼', 
+INSERT INTO Projects (project_id, leader_id, topic, description1, description2, capacity, deadline, status) VALUES
+(7, 'student_lee', '멋쟁이 사자처럼 교내 동아리 메인 페이지 리뉴얼', 
  '기존 PHP 사이트를 Next.js로 마이그레이션 하는 작업입니다.', 
  '1. 리뉴얼 목적
    - 노후화된 PHP 기반의 레거시 코드를 청산하고, 유지보수가 용이한 모던 웹 스택으로 전환
@@ -206,7 +215,8 @@ INSERT INTO Projects (leader_id, topic, description1, description2, capacity, de
 3. 최소 목표
    - Vercel을 통한 CI/CD 파이프라인 구축 경험
    - 디자이너와 개발자 간의 핸드오프 과정(Zeplin 활용) 경험', 
- 4, '2025-09-30', 'Completed');
+ 4, '2025-09-30', 'Completed')
+ON CONFLICT (project_id) DO NOTHING;
 
 
 -- 7. 프로젝트 필요 기술 매핑
@@ -214,31 +224,44 @@ INSERT INTO Projects (leader_id, topic, description1, description2, capacity, de
 INSERT INTO Project_Required_Skills (project_id, skill_id) VALUES
 (1, (SELECT skill_id FROM Skills WHERE skill_name = 'spring boot')),
 (1, (SELECT skill_id FROM Skills WHERE skill_name = 'react')),
-(1, (SELECT skill_id FROM Skills WHERE skill_name = 'python'));
+(1, (SELECT skill_id FROM Skills WHERE skill_name = 'python'))
+ON CONFLICT (project_id, skill_id) DO NOTHING;
+
 -- P2 (Algo Study)
 INSERT INTO Project_Required_Skills (project_id, skill_id) VALUES
 (2, (SELECT skill_id FROM Skills WHERE skill_name = 'python')),
-(2, (SELECT skill_id FROM Skills WHERE skill_name = 'c++'));
+(2, (SELECT skill_id FROM Skills WHERE skill_name = 'c++'))
+ON CONFLICT (project_id, skill_id) DO NOTHING;
+
 -- P3 (Hackathon)
 INSERT INTO Project_Required_Skills (project_id, skill_id) VALUES
 (3, (SELECT skill_id FROM Skills WHERE skill_name = 'nodejs')),
-(3, (SELECT skill_id FROM Skills WHERE skill_name = 'react'));
+(3, (SELECT skill_id FROM Skills WHERE skill_name = 'react'))
+ON CONFLICT (project_id, skill_id) DO NOTHING;
+
 -- P4 (Fintech - New)
 INSERT INTO Project_Required_Skills (project_id, skill_id) VALUES
 (4, (SELECT skill_id FROM Skills WHERE skill_name = 'react')),
-(4, (SELECT skill_id FROM Skills WHERE skill_name = 'python'));
+(4, (SELECT skill_id FROM Skills WHERE skill_name = 'python'))
+ON CONFLICT (project_id, skill_id) DO NOTHING;
+
 -- P5 (Healthcare - New)
 INSERT INTO Project_Required_Skills (project_id, skill_id) VALUES
 (5, (SELECT skill_id FROM Skills WHERE skill_name = 'flutter')),
-(5, (SELECT skill_id FROM Skills WHERE skill_name = 'figma'));
+(5, (SELECT skill_id FROM Skills WHERE skill_name = 'figma'))
+ON CONFLICT (project_id, skill_id) DO NOTHING;
+
 -- P6 (BigData - New)
 INSERT INTO Project_Required_Skills (project_id, skill_id) VALUES
 (6, (SELECT skill_id FROM Skills WHERE skill_name = 'python')),
-(6, (SELECT skill_id FROM Skills WHERE skill_name = 'pandas'));
+(6, (SELECT skill_id FROM Skills WHERE skill_name = 'pandas'))
+ON CONFLICT (project_id, skill_id) DO NOTHING;
+
 -- P7 (Web Renewal - New)
 INSERT INTO Project_Required_Skills (project_id, skill_id) VALUES
 (7, (SELECT skill_id FROM Skills WHERE skill_name = 'nextjs')),
-(7, (SELECT skill_id FROM Skills WHERE skill_name = 'typescript'));
+(7, (SELECT skill_id FROM Skills WHERE skill_name = 'typescript'))
+ON CONFLICT (project_id, skill_id) DO NOTHING;
 
 
 -- 8. 지원서 (Applications) 데이터 (구체적이고 진지한 지원동기)
@@ -247,60 +270,70 @@ INSERT INTO Project_Required_Skills (project_id, skill_id) VALUES
 INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation, status) VALUES
 (1, 'student_lee', '2025-11-21', 
  '프론트엔드 리드 개발자로 지원합니다. Next.js와 Recoil을 사용한 프로젝트 경험이 있으며, Figma를 활용한 프로토타이핑부터 반응형 웹 구현까지 전담할 수 있습니다. 캡스톤 A+를 목표로 최선을 다하겠습니다.', 
- 'Accepted');
+ 'Accepted')
+ON CONFLICT (project_id, applicant_id) DO NOTHING;
 
 -- P1 (Capstone) - AI 지원자 (박서연)
 INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation, status) VALUES
 (1, 'student_park', '2025-11-22', 
  '추천 시스템 알고리즘에 깊은 관심이 있습니다. 협업 필터링과 콘텐츠 기반 필터링을 결합한 하이브리드 모델을 구현해보고 싶어 지원했습니다. 관련 논문 구현 경험이 있어 빠르게 적용 가능합니다.', 
- 'Pending');
+ 'Pending')
+ON CONFLICT (project_id, applicant_id) DO NOTHING;
 
 -- P1 (Capstone) - Backend 지원자 (정도윤 - 거절됨)
 INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation, status) VALUES
 (1, 'student_jung', '2025-11-23', 
  '백엔드 아키텍처를 배우고 싶습니다. 아직 대규모 트래픽 처리 경험은 없지만, API 명세서 작성과 테스트 코드 작성 등 팀에 기여할 수 있는 부분부터 차근차근 맡아서 수행하겠습니다.', 
- 'Rejected');
+ 'Rejected')
+ON CONFLICT (project_id, applicant_id) DO NOTHING;
 
 -- P2 (Study) - 김민준
 INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation, status) VALUES
 (2, 'student_kim', '2025-11-05', 
  '삼성전자 SW 역량테스트를 준비하고 있습니다. 혼자서 공부하다 보니 시간 관리가 잘 되지 않아 지원했습니다. 매일 1문제 풀이 인증과 주말 모의 면접에 성실히 참여하겠습니다.', 
- 'Accepted');
+ 'Accepted')
+ON CONFLICT (project_id, applicant_id) DO NOTHING;
 
 -- P2 (Study) - 정도윤
 INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation, status) VALUES
 (2, 'student_jung', '2025-11-06', 
  '자료구조 수업에서 그래프 탐색 부분이 약하다고 느껴 지원했습니다. 이번 방학 동안 골드 티어 달성을 목표로 선배님들의 코드를 보며 배우고 싶습니다.', 
- 'Pending');
+ 'Pending')
+ON CONFLICT (project_id, applicant_id) DO NOTHING;
 
 -- P3 (Hackathon - Completed)
 INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation, status) VALUES
 (3, 'student_lee', '2025-10-25', '디자인 전담 가능합니다. 제한 시간 내에 와이어프레임과 UI 에셋을 빠르게 제작하여 개발 속도를 높여드리겠습니다.', 'Accepted'),
-(3, 'student_kim', '2025-10-26', '백엔드 소켓 통신 구현 경험이 있습니다. 실시간 위치 데이터를 지연 없이 클라이언트로 전송하는 서버 구축을 담당하겠습니다.', 'Accepted');
+(3, 'student_kim', '2025-10-26', '백엔드 소켓 통신 구현 경험이 있습니다. 실시간 위치 데이터를 지연 없이 클라이언트로 전송하는 서버 구축을 담당하겠습니다.', 'Accepted')
+ON CONFLICT (project_id, applicant_id) DO NOTHING;
 
 -- P4 (Fintech - Recruiting)
 INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation, status) VALUES
 (4, 'student_choi', '2025-12-01', 
  '경영학 복수전공으로 재무제표와 투자 지표에 대한 이해도가 높습니다. 서비스 기획 단계에서 데이터 구조를 정의하고, 일정 관리를 맡아 프로젝트가 기한 내 완성되도록 돕겠습니다.', 
- 'Pending');
+ 'Pending')
+ON CONFLICT (project_id, applicant_id) DO NOTHING;
 
 INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation, status) VALUES
 (4, 'student_lee', '2025-12-02', 
  'Recharts와 D3.js 라이브러리를 활용하여 인터랙티브한 금융 차트를 구현해보고 싶습니다. 포트폴리오에 넣을 수 있는 완성도 높은 UI를 만들 자신이 있습니다.', 
- 'Accepted');
+ 'Accepted')
+ON CONFLICT (project_id, applicant_id) DO NOTHING;
 
 -- P5 (Healthcare - In_Progress)
 INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation, status) VALUES
 (5, 'student_jung', '2025-11-15', 
  'Flutter 기초 강의를 완강하고 실제 앱 출시 프로세스를 경험해보고 싶어 지원했습니다. Firebase 연동과 UI 퍼블리싱 업무를 주시면 밤을 새워서라도 해오겠습니다.', 
- 'Accepted');
+ 'Accepted')
+ON CONFLICT (project_id, applicant_id) DO NOTHING;
 
 -- P6 (BigData - Completed)
 INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation, status) VALUES
 (6, 'student_kim', '2025-09-20', 
  'Pandas를 활용한 대용량 데이터 전처리 및 파이프라인 구축이 가능합니다. 분석가분들이 모델링에만 집중할 수 있도록 깨끗한 데이터셋을 제공하겠습니다.', 
  'Accepted'),
-(6, 'student_jung', '2025-09-21', '데이터 사이언스 분야에 관심이 많습니다. 데이터 라벨링이나 시각화 자료 정리 등 보조 업무를 수행하며 분석 과정을 어깨너머로 배우고 싶습니다.', 'Accepted');
+(6, 'student_jung', '2025-09-21', '데이터 사이언스 분야에 관심이 많습니다. 데이터 라벨링이나 시각화 자료 정리 등 보조 업무를 수행하며 분석 과정을 어깨너머로 배우고 싶습니다.', 'Accepted')
+ON CONFLICT (project_id, applicant_id) DO NOTHING;
 
 -- P7 (Web Renewal - Completed)
 INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation, status) VALUES
@@ -309,7 +342,8 @@ INSERT INTO Applications (project_id, applicant_id, applicant_date, motivation, 
  'Accepted'),
 (7, 'student_park', '2025-08-16', 
  'Next.js로 전환하신다고 들었습니다. 혹시 데이터 분석용 백엔드 서버가 별도로 필요하다면 FastAPI로 구축해드릴 수 있어 지원합니다.', 
- 'Rejected');
+ 'Rejected')
+ON CONFLICT (project_id, applicant_id) DO NOTHING;
 
 
 -- 9. 동료 평가 (Peer_Reviews) 데이터
@@ -320,9 +354,12 @@ INSERT INTO Peer_Reviews (project_id, reviewer_id, reviewee_id, score, comment) 
 (3, 'student_lee', 'student_kim', 5, 'API 명세가 완벽해서 프론트 개발이 빨랐습니다. 소켓 통신도 안정적이었습니다.'),
 (3, 'student_kim', 'student_choi', 4, '일정 관리는 좋았으나 기획이 중간에 조금 흔들렸습니다. 그래도 리딩하느라 고생하셨습니다.'),
 (3, 'student_kim', 'student_lee', 5, '최고의 디자이너! 개발자의 니즈를 정확히 파악해주십니다.'),
-(3, 'student_lee', 'student_choi', 5, '팀원 멘탈 케어를 잘 해주십니다. 덕분에 끝까지 완주했어요.');
+(3, 'student_lee', 'student_choi', 5, '팀원 멘탈 케어를 잘 해주십니다. 덕분에 끝까지 완주했어요.')
+ON CONFLICT (project_id, reviewer_id, reviewee_id) DO NOTHING;
+
 INSERT INTO Peer_Reviews (project_id, reviewer_id, reviewee_id, score, comment) VALUES
-(3, 'student_choi', 'student_kim', 4, '기술적 난이도가 높은 부분을 잘 해결해주셨습니다. 소통만 조금 더 자주 해주세요.');
+(3, 'student_choi', 'student_kim', 4, '기술적 난이도가 높은 부분을 잘 해결해주셨습니다. 소통만 조금 더 자주 해주세요.')
+ON CONFLICT (project_id, reviewer_id, reviewee_id) DO NOTHING;
 
 -- [Project 6: BigData] (Leader: Park, Members: Kim, Jung)
 INSERT INTO Peer_Reviews (project_id, reviewer_id, reviewee_id, score, comment) VALUES
@@ -331,9 +368,11 @@ INSERT INTO Peer_Reviews (project_id, reviewer_id, reviewee_id, score, comment) 
 (6, 'student_park', 'student_jung', 3, '열정은 좋으나 Python 기초가 조금 부족해 보입니다. 더 공부가 필요해요.'),
 (6, 'student_jung', 'student_park', 5, '많이 배웠습니다! 모르는 거 물어볼 때마다 친절하게 알려주셔서 감사합니다.'),
 (6, 'student_kim', 'student_jung', 4, '시키는 일은 성실하게 잘 수행합니다. 성장 가능성이 보입니다.'),
-(6, 'student_jung', 'student_kim', 5, '코드 리뷰 꼼꼼하게 해주셔서 감사합니다. 판다스 꿀팁 많이 얻어갑니다.');
+(6, 'student_jung', 'student_kim', 5, '코드 리뷰 꼼꼼하게 해주셔서 감사합니다. 판다스 꿀팁 많이 얻어갑니다.')
+ON CONFLICT (project_id, reviewer_id, reviewee_id) DO NOTHING;
 
 -- [Project 7: Web Renewal] (Leader: Lee, Members: Choi)
 INSERT INTO Peer_Reviews (project_id, reviewer_id, reviewee_id, score, comment) VALUES
 (7, 'student_lee', 'student_choi', 4, '문서화를 잘 해주셔서 인수인계가 편했습니다. 꼼꼼하십니다.'),
-(7, 'student_choi', 'student_lee', 5, 'Next.js 도입 결정이 신의 한 수였습니다. 사이트 속도가 체감될 정도로 빨라졌어요.');
+(7, 'student_choi', 'student_lee', 5, 'Next.js 도입 결정이 신의 한 수였습니다. 사이트 속도가 체감될 정도로 빨라졌어요.')
+ON CONFLICT (project_id, reviewer_id, reviewee_id) DO NOTHING;
