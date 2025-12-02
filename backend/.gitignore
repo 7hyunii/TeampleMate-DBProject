@@ -20,8 +20,5 @@ venv/
 # 기타
 .DS_Store
 /db/sql/SQL_Check.sql
-# /db/sql/CreateTable.sql
-# /db/sql/app_roles_and_privileges.sql
-/db/sql/TestData.sql
 DB_Report.md
 FastAPI.md

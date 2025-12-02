@@ -178,12 +178,20 @@ Project/
 
 4. **데이터베이스 설정**
    - PostgreSQL 데이터베이스를 생성합니다. (예: `teample_mate_db`)
-   - **생성한 데이터베이스에 접속하여** 다음 스크립트들을 순서대로 실행합니다. (반드시 `postgres`와 같은 **슈퍼유저 계정**으로 실행해야 합니다.)
+   - **생성한 데이터베이스에 접속하여** 다음 스크립트들을 순서대로 실행합니다.
      1. `backend/db/sql/CreateTable.sql`: 테이블 및 뷰 생성
-     2. `backend/db/sql/App_roles_and_privileges.sql`: 역할(Role) 생성 및 권한 부여
-        - *이 스크립트는 `teample_dev` 계정(비밀번호: `teample_password`)을 생성합니다.*
-   - `backend/db/session.py` (또는 `.env`) 파일에서 DB 연결 정보를 수정합니다.
-     - 위에서 생성된 `teample_dev` 계정 정보를 사용하는 것을 권장합니다.
+         - 테스트 데이터를 넣고 싶은 경우 `backend/db/sql/CreateTable.sql` 하단에 `backend/db/sql/TestData.sql`을 복사하여 붙여넣고 실행합니다.
+     2. `backend/db/sql/CreateRoles.sql`: 역할(Role) 생성
+         - (이 파일은 반드시 `postgres`와 같은 **슈퍼유저 계정**으로 실행해야 합니다.)
+     3. `backend/db/sql/App_roles_and_privileges.sql` : 권한 부여
+   - `backend\.env` 파일을 생성해 다음 정보를 입력합니다.
+      ```ini
+      POSTGRES_DB=생성한 데이터베이스 이름
+      POSTGRES_USER=teample_dev
+      POSTGRES_PASSWORD=teample_password
+      POSTGRES_HOST=localhost
+      POSTGRES_PORT=5432
+      ```
 
 5. **서버 실행**
    ```bash
