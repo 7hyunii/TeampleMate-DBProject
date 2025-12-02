@@ -176,21 +176,21 @@ Project/
    ```
 
 4. **데이터베이스 설정**
-   - PostgreSQL 데이터베이스를 생성합니다. (예: `teample_mate_db`)
-   - **생성한 데이터베이스에 접속하여** 다음 스크립트들을 순서대로 실행합니다.
-     1. `backend/db/sql/CreateTable.sql`: 테이블, 뷰 및 인덱스 생성
-         - 테스트 데이터를 넣고 싶은 경우 `backend/db/sql/CreateTable.sql` 하단에 `backend/db/sql/TestData.sql`을 복사하여 붙여넣고 실행합니다.
-     2. `backend/db/sql/CreateRoles.sql`: 역할(Role) 생성
-         - (이 파일은 반드시 `postgres`와 같은 **슈퍼유저 계정**으로 실행해야 합니다.)
-     3. `backend/db/sql/App_roles_and_privileges.sql` : 권한 부여
    - `backend/.env` 파일을 생성해 다음 정보를 입력합니다.
+   - `ADMIN_USER`와 `ADMIN_PASSWORD`는 초기 데이터베이스 및 Role 생성을 위해 필요한 로컬 PostgreSQL 슈퍼유저 계정 정보입니다.
       ```ini
-      POSTGRES_DB=생성한 데이터베이스 이름
+      # 애플리케이션이 사용할 DB 정보
       POSTGRES_USER=teample_dev
       POSTGRES_PASSWORD=teample_password
+      POSTGRES_DB=teamplemate_db
       POSTGRES_HOST=localhost
       POSTGRES_PORT=5432
+
+      # 초기 세팅을 위한 슈퍼유저 정보
+      ADMIN_USER=your_superuser_name
+      ADMIN_PASSWORD=your_superuser_password
       ```
+   - 서버를 실행하면 자동으로 데이터베이스, Role, 테이블 및 테스트 데이터가 생성됩니다.
 
 5. **서버 실행**
    ```bash
