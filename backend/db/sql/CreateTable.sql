@@ -78,6 +78,17 @@ CREATE TABLE Peer_Reviews (
     CHECK (reviewer_id != reviewee_id)
 );
 
+-- 리더 아이디(leader_id) 기준 프로젝트 조회를 위한 인덱스
+CREATE INDEX IF NOT EXISTS idx_projects_leader ON Projects(leader_id);
+
+-- 모집 중(Recruiting) 상태인 프로젝트의 마감일 기준 부분 인덱스
+CREATE INDEX IF NOT EXISTS idx_projects_recruiting_deadline
+ON Projects(deadline) WHERE status = 'Recruiting';
+
+-- 승인된(Accepted) 상태의 지원 내역 조회를 위한 부분 인덱스
+CREATE INDEX IF NOT EXISTS idx_applications_project_accepted
+ON Applications(project_id) WHERE status = 'Accepted';
+
 
 -- 모집 중인 프로젝트만 보여주는 View
 CREATE OR REPLACE VIEW RecruitingProjectsView AS
