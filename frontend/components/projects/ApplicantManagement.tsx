@@ -18,7 +18,7 @@ interface ApplicantManagementProps {
 
 type ApplicantStatus = 'Pending' | 'Accepted' | 'Rejected';
 
-type PastReview = { score: number; comment: string; projectName: string };
+type PastReview = { score: number; comment: string };
 
 type Applicant = {
   id: string;
@@ -48,7 +48,7 @@ type ApiApplicant = {
   applicant_motivation?: string;
   status: 'Pending' | 'Accepted' | 'Rejected';
   applicant_skills?: string[];
-  applicant_reviews?: Array<{ score?: number; comment?: string; projectName?: string }>;
+  applicant_reviews?: Array<{ score?: number; comment?: string }>;
 };
 
 type ApiApplicationsResponse = { applications: ApiApplicant[] };
@@ -67,7 +67,7 @@ function mapApiApplicantToApplicant(api: ApiApplicant): Applicant {
     avgRating: undefined,
     reviewCount: api.applicant_reviews ? api.applicant_reviews.length : 0,
     pastReviews: api.applicant_reviews
-      ? api.applicant_reviews.map(r => ({ score: r.score ?? 0, comment: r.comment ?? '', projectName: r.projectName ?? '' }))
+      ? api.applicant_reviews.map(r => ({ score: r.score ?? 0, comment: r.comment ?? '' }))
       : [],
   };
 }
@@ -299,7 +299,6 @@ export function ApplicantManagement({ projectId, applicantId, currentUserId, onB
                           />
                         ))}
                       </div>
-                      <span className="text-xs text-slate-600 font-medium">· {review.projectName}</span>
                     </div>
                     <p className="text-sm text-slate-700">"{review.comment}"</p>
                   </div>
