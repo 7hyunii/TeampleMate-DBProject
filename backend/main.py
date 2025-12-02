@@ -1,11 +1,18 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.v1.endpoints.auth import router as auth_router
 from api.v1.endpoints.profile import router as profile_router
 from api.v1.endpoints.projects import router as projects_router
 from api.v1.endpoints.applications import router as applications_router
+from db.init_db import init_db
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 # CORS 미들웨어 추가: 프론트엔드(다른 포트)에서 API 호출 허용
 app.add_middleware(

@@ -1,7 +1,5 @@
 /* ============================================================
    Teample Mate - 테스트 데이터 (프로젝트 7개, 리뷰 18개)
-
-   /* CreateTable.sql 파일 하단에 넣어서 실행시키기 */
    ============================================================ */
 
 -- 3. 기술 스택 (Skills) 데이터
@@ -15,7 +13,7 @@ INSERT INTO Skills (skill_name) VALUES
 
 
 -- 4. 학생 (Students) 데이터 
--- 비밀번호: pw1234 (검증됨)
+-- 비밀번호: pw1234
 INSERT INTO Students (uid, name, hashed_password, email, profile_text, website_link) VALUES
 ('student_kim', '김민준', 
  '$2b$12$4odQoeVEfPIqD.eKTQtGqe/qVnhoFtbXu2S4IQZ1CSJSH.YxQrNMW', 
@@ -90,7 +88,7 @@ INSERT INTO Projects (leader_id, topic, description1, description2, capacity, de
 4. 협업 방식
    - 매주 화요일 오후 7시 대면 회의 (공학관 스터디룸)
    - Notion으로 회의록 관리, Jira로 이슈 및 일정 관리', 
- 4, '2025-12-20', 'Recruiting');
+ 4, '2025-12-30', 'Recruiting');
 
 -- [2: In_Progress] 알고리즘 스터디
 INSERT INTO Projects (leader_id, topic, description1, description2, capacity, deadline, status) VALUES
@@ -147,7 +145,7 @@ INSERT INTO Projects (leader_id, topic, description1, description2, capacity, de
    - 금융 데이터 처리에 관심이 많으신 분
    - WebSocket을 이용한 실시간 데이터 처리를 경험해보고 싶으신 분
    - 포트폴리오용으로 완성도 있는 프로젝트를 하나 남기고 싶으신 분', 
- 3, '2025-12-15', 'Recruiting');
+ 3, '2025-12-30', 'Recruiting');
 
 -- [5: In_Progress] 모바일 헬스케어 앱 (Flutter)
 INSERT INTO Projects (leader_id, topic, description1, description2, capacity, deadline, status) VALUES

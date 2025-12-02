@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS Skills CASCADE;
 DROP TABLE IF EXISTS Students CASCADE;
 -- 삭제 
 
-CREATE TABLE Students (
+CREATE TABLE IF NOT EXISTS Students (
   uid VARCHAR(50) PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   hashed_password VARCHAR(255) NOT NULL,
@@ -21,13 +21,13 @@ CREATE TABLE Students (
   website_link TEXT DEFAULT '' NOT NULL
 );
 
-CREATE TABLE Skills (
+CREATE TABLE IF NOT EXISTS Skills (
     skill_id SERIAL PRIMARY KEY,
     skill_name VARCHAR(100) UNIQUE NOT NULL CHECK (skill_name = LOWER(skill_name))
 );
 
 
-CREATE TABLE Student_Skills (
+CREATE TABLE IF NOT EXISTS Student_Skills (
     uid VARCHAR(50) NOT NULL,
     skill_id INTEGER NOT NULL,
     PRIMARY KEY (uid, skill_id),
@@ -36,7 +36,7 @@ CREATE TABLE Student_Skills (
 );
 
 
-CREATE TABLE Projects (
+CREATE TABLE IF NOT EXISTS Projects (
     project_id SERIAL PRIMARY KEY,
     leader_id VARCHAR(50) NOT NULL REFERENCES Students(uid),
     topic VARCHAR(200) NOT NULL,
@@ -47,7 +47,7 @@ CREATE TABLE Projects (
     status VARCHAR(20) DEFAULT 'Recruiting' CHECK (status IN ('Recruiting', 'In_Progress', 'Completed'))
 );
 
-CREATE TABLE Project_Required_Skills (
+CREATE TABLE IF NOT EXISTS Project_Required_Skills (
     project_id INTEGER NOT NULL,
     skill_id INTEGER NOT NULL,
     PRIMARY KEY (project_id, skill_id),
@@ -56,7 +56,7 @@ CREATE TABLE Project_Required_Skills (
 );
 
 
-CREATE TABLE Applications (
+CREATE TABLE IF NOT EXISTS Applications (
     application_id SERIAL PRIMARY KEY,
     project_id INTEGER NOT NULL REFERENCES Projects(project_id),
     applicant_id VARCHAR(50) NOT NULL REFERENCES Students(uid),
@@ -67,7 +67,7 @@ CREATE TABLE Applications (
 );
 
 
-CREATE TABLE Peer_Reviews (
+CREATE TABLE IF NOT EXISTS Peer_Reviews (
     review_id SERIAL PRIMARY KEY,
     project_id INTEGER NOT NULL REFERENCES Projects(project_id),
     reviewer_id VARCHAR(50) NOT NULL REFERENCES Students(uid),
