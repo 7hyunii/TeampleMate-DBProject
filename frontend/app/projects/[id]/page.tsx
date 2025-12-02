@@ -76,7 +76,6 @@ export default function ProjectDetailPage({ params, searchParams }: ProjectDetai
         currentUserId={userId}
         onBack={() => {
           setView('detail');
-          router.push('/myprojects');
         }}
       />
     );
