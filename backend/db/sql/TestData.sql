@@ -376,3 +376,6 @@ INSERT INTO Peer_Reviews (project_id, reviewer_id, reviewee_id, score, comment) 
 (7, 'student_lee', 'student_choi', 4, '문서화를 잘 해주셔서 인수인계가 편했습니다. 꼼꼼하십니다.'),
 (7, 'student_choi', 'student_lee', 5, 'Next.js 도입 결정이 신의 한 수였습니다. 사이트 속도가 체감될 정도로 빨라졌어요.')
 ON CONFLICT (project_id, reviewer_id, reviewee_id) DO NOTHING;
+
+--시퀀스 동기화 (Projects 테이블의 project_id)
+SELECT setval('projects_project_id_seq', (SELECT MAX(project_id) FROM Projects));
